@@ -145,7 +145,7 @@ public class Cannon : MonoBehaviour
 			{
 				cannon_line.SetPosition(0, start);
 				cannon_line.SetPosition(1, End);
-				cannon_line.enabled = true;
+				cannon_line.enabled = false;
 			} 
 			else
 				cannon_line.enabled = false;

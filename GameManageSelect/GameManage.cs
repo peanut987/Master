@@ -1062,9 +1062,23 @@ public class GameManage : MonoBehaviour
         string BlueAlgorithm;
 
         if (TranningSetting.algorithmSelect.NRStandard && !TranningSetting.algorithmSelect.RLStandard)
-            BlueAlgorithm = "NR-Standard-Even";
+        {
+            if(TranningSetting.BlueTeam.nums == 3 && (TranningSetting.RedTeam.nums == 4 || TranningSetting.RedTeam.nums == 5))
+                BlueAlgorithm = "NR-Standard-Less";
+            else if(TranningSetting.RedTeam.nums == 3 && (TranningSetting.BlueTeam.nums == 4 || TranningSetting.BlueTeam.nums == 5))
+                BlueAlgorithm = "NR-Standard-More";
+            else
+                BlueAlgorithm = "NR-Standard-Even";
+        }
         else if (!TranningSetting.algorithmSelect.NRStandard && TranningSetting.algorithmSelect.RLStandard)
-            BlueAlgorithm = "RL-Standard-Even";
+        {
+            if (TranningSetting.BlueTeam.nums == 3 && (TranningSetting.RedTeam.nums == 4 || TranningSetting.RedTeam.nums == 5))
+                BlueAlgorithm = "RL-Standard-Less";
+            else if (TranningSetting.RedTeam.nums == 3 && (TranningSetting.BlueTeam.nums == 4 || TranningSetting.BlueTeam.nums == 5))
+                BlueAlgorithm = "RL-Standard-More";
+            else
+                BlueAlgorithm = "RL-Standard-Even";
+        }
         else
             BlueAlgorithm = " ";
 
@@ -1075,7 +1089,7 @@ public class GameManage : MonoBehaviour
         TextList[3].text = "蓝方当前存活: " + num_Blue.ToString();
 
 
-        TextList[4].text = "红方胜率: " + ((float)Red_win / (Red_win + Blue_win)).ToString("f3");
+        TextList[4].text = "红方胜率: " + ((float)Red_win / (round - 1)).ToString("f3");
 
         float a1 = (float)BIO_Dead_Cacul_Num / (Red_win * TranningSetting.RedTeam.nums);
         float a2 = (float)BIO_PH_Cacul_Loss / (Red_win * TranningSetting.RedTeam.nums * man.PHFULL);

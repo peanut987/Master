@@ -8,6 +8,7 @@ public class ObstacleAvoid : MonoBehaviour
     public Transform obstacleRoot;
     public TranningSetting trainingSetting;
     public int teamnum, enemynum;
+    public float[] roundTime = new float[4];
     private RaycastHit hit;
     //private Vector3 MoveDir, MoveDir1, TeamMateDir, OtherEnemyDir = Vector3.zero;
     // Start is called before the first frame update
@@ -17,6 +18,12 @@ public class ObstacleAvoid : MonoBehaviour
         trainingSetting = FindObjectOfType<TranningSetting>();
         teamnum = trainingSetting.RedTeam.nums;
         enemynum = trainingSetting.BlueTeam.nums;
+        if(teamnum == 3)
+            roundTime = new float[] { 25, 15, 25, 25 };
+        else if(teamnum >= 3)
+            roundTime = new float[] { 5, 15, 5, 5 };
+
+
     }
 
     //通过计算每个障碍物对坦克的合力求出运行方向，如果不再避障范围，则作用力为零，距离越小作用力越大
@@ -33,10 +40,10 @@ public class ObstacleAvoid : MonoBehaviour
         man.target_dis = isEnmey ? Vector3.Distance(target, transform.position) : 3000.0f;
 
         //target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 90, 30, 0);
-        if ((GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= 5 && man.gameManage.round % 4 == 0)
-            ||(GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= 15 && man.gameManage.round % 4 == 1)
-            || (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= 25 && man.gameManage.round % 4 == 2)
-            || (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= 25 && man.gameManage.round % 4 == 3))
+        if ((GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[0] && man.gameManage.round % 4 == 0)
+            ||(GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[1] && man.gameManage.round % 4 == 1)
+            || (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[2] && man.gameManage.round % 4 == 2)
+            || (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[3] && man.gameManage.round % 4 == 3))
         {
             switch (man.findEnemy2.judgeSelfPosToCenter(man))
             {
