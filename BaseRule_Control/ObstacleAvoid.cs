@@ -21,7 +21,7 @@ public class ObstacleAvoid : MonoBehaviour
         if(teamnum == 3)
             roundTime = new float[] { 22, 20, 25, 22 };
         else if(teamnum > 3)
-            roundTime = new float[] { 5, 15, 5, 5 };
+            roundTime = new float[] { 5, 20, 5, 5 };//91:6 5¡¢15¡¢5¡¢5
 
 
     }
@@ -48,10 +48,10 @@ public class ObstacleAvoid : MonoBehaviour
             switch (man.findEnemy2.judgeSelfPosToCenter(man))
             {
                 case 1:
-                    target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, -45, 30, 0);
+                    target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, -60, 30, 0);
                     break;
                 case 2:
-                    target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 45, 30, 0);
+                    target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 60, 30, 0);
                     break;
                 default:
                     target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 0, 30, 0);
