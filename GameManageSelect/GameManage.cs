@@ -357,6 +357,14 @@ public class GameManage : MonoBehaviour
                 {
                     item.PH = TranningSetting.BlueTeam.FULLPH * 2;
                 }
+                else if (TranningSetting.RedTeam.nums == 3 && TranningSetting.BlueTeam.nums == 4)
+                {
+                    item.PH = TranningSetting.BlueTeam.FULLPH * 2;
+                }
+                else if (TranningSetting.RedTeam.nums == 4 && TranningSetting.BlueTeam.nums == 3)
+                {
+                    item.PH = TranningSetting.BlueTeam.FULLPH * 3;
+                }
                 else
                 {
                     item.PH = TranningSetting.BlueTeam.FULLPH;

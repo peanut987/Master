@@ -225,9 +225,10 @@ public class ManControl : MonoBehaviour
 			if (tankTeam == TankTeam.Tank_Red)
 			{
 				//计算基本信息
-				if(MinNum == -1 && MinNum == 0)
+				if(MinNum != -1 && MinNum != 0)
                 {
-					if (tankSpawner.BlueAgentsList[MinNum - 1].Isdead) switchtime = switchlimit;
+					if (tankSpawner.useTA && tankSpawner.TAList[MinNum - 1].Isdead) switchtime = switchlimit + 1;
+					else if(!tankSpawner.useTA && tankSpawner.BlueAgentsList[MinNum - 1].Isdead) switchtime = switchlimit + 1;
 				}
 				infoCalculate2.Calculate(this, transform);
 				if (!trainingSetting.RedTeam.HumanControl && (MinNum == -1 || switchtime > switchlimit))
