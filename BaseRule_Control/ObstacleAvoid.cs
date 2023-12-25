@@ -19,7 +19,7 @@ public class ObstacleAvoid : MonoBehaviour
         teamnum = trainingSetting.RedTeam.nums;
         enemynum = trainingSetting.BlueTeam.nums;
         if(teamnum == 3)
-            roundTime = new float[] { 15, 20, 15, 20 };
+            roundTime = new float[] { 20, 27, 25, 22 };
         else if(teamnum > 3)
             roundTime = new float[] { 5, 15, 5, 5 };
 

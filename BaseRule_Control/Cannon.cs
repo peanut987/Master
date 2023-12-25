@@ -18,7 +18,7 @@ public class Cannon : MonoBehaviour
 	public bool ColliderFlag = false;
 	public bool ColliderFlag1 = false;
 	private float castDis = 2000.0f;
-	private float sphereRadius = 0.7f; // 设置球体的半径
+	private float sphereRadius = 1.0f; // 设置球体的半径
 	void Start()
 	{
 		tankTransform = transform.parent.parent.parent;
