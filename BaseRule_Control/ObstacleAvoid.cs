@@ -22,7 +22,7 @@ public class ObstacleAvoid : MonoBehaviour
             roundTime = new float[] { 22, 20, 25, 22 };
         else if(teamnum > 3)
             roundTime = new float[] { 5, 20, 5, 5 };//91:6 5¡¢15¡¢5¡¢5
-
+         
 
     }
 
