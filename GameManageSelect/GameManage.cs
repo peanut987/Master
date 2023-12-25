@@ -1121,7 +1121,7 @@ public class GameManage : MonoBehaviour
         TextList[3].text = "蓝方当前存活: " + num_Blue.ToString();
 
 
-        TextList[4].text = "红方胜率: " + ((float)Red_win / (round - 1)).ToString("f3");
+        TextList[4].text = "红方胜率: " + ((float)Red_win / (Red_win + Blue_win + Both_win)).ToString("f3");
 
         float a1 = (float)BIO_Dead_Cacul_Num / (Red_win * TranningSetting.RedTeam.nums);
         float a2 = (float)BIO_PH_Cacul_Loss / (Red_win * TranningSetting.RedTeam.nums * man.PHFULL);
