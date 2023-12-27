@@ -198,7 +198,10 @@ public class GameManage : MonoBehaviour
     }
     void FixedUpdate()
     {
-
+        if (round >= 101)
+        {
+            Time.timeScale = 0;
+        }
         left_Step -= 1;
         RedScore = 0;
         BlueScore = 0;

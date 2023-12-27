@@ -21,7 +21,7 @@ public class ObstacleAvoid : MonoBehaviour
         if(teamnum == 3)
             roundTime = new float[] { 22, 20, 25, 22 };
         else if(teamnum > 3)
-            roundTime = new float[] { 5, 20, 5, 5 };//91:6 5、15、5、5
+            roundTime = new float[] { 15, 20, 15, 15 };//91:6 5、15、5、5
          
 
     }
@@ -87,10 +87,10 @@ public class ObstacleAvoid : MonoBehaviour
                 switch (man.findEnemy2.judgeSelfPosToCenter(man))
                 {
                     case 1:
-                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 45, 30, 0);
+                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 70, 30, 0);
                         break;
                     case 2:
-                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, -45, 30, 0);
+                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, -70, 30, 0);
                         break;
                     default:
                         target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 0, 30, 0);
@@ -120,7 +120,7 @@ public class ObstacleAvoid : MonoBehaviour
             isEnmey = false;
 
         if (((man.target_dis < man.BackDistance - 100 && man.firetime < 300)||
-        (man.speedControl == true && man.enemyDisXOZ < 200 && man.firetime > 300)) && man.rotateFlag != 1 && isEnmey)
+        (man.speedControl == true && man.enemyDisXOZ < 150 && man.firetime > 300)) && man.rotateFlag != 1 && isEnmey)
             man.relativespeed = -1.0f;
         EnemyDir = (target - transform.position).normalized;
         // EnemyDir = EnemyDir / 5;
