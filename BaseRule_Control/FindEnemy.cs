@@ -305,7 +305,7 @@ public class FindEnemy : MonoBehaviour
         TATank.Enemyinf[2] = TempRot[1];//右边为正左边为负值
 
         TATank.target1 = tankSpawner.Biolist[TATank.MinNum - 1].transform.position;
-        if(TATank.baseFunction2.CalculateDisX0Z(TATank.target1,TATank.transform.position) > 30)
+        if (TATank.baseFunction2.CalculateDisX0Z(TATank.target1, TATank.transform.position) > 30)
             TATank.offset = ((TATank.target1 - TATank.transform.position).normalized + obstacleAvoid2.ObstacleVector(TATank, 45, 30).normalized).normalized;//obstacleAvoid2.CacPosition(TATank, transform, TATank.target1, 180);//通过避障函数求出运行方向
         else
             TATank.offset = ((TATank.transform.position - TATank.target1).normalized + obstacleAvoid2.ObstacleVector(TATank, 45, 30).normalized).normalized;//obstacleAvoid2.CacPosition(TATank, transform, TATank.target1, 180);//通过避障函数求出运行方向
@@ -333,7 +333,7 @@ public class FindEnemy : MonoBehaviour
             TATank.enemyAngle = Vector3.Angle(newTarget, TATank.ShellPos.forward);
             TATank.enemyAngle1 = newTarget.normalized.y > TATank.cannon.transform.forward.normalized.y ?
                        TATank.enemyAngle : -TATank.enemyAngle;
-            TATank.OpenFire2(1, TATank.enemyAngle1, 1);
+            TATank.OpenFire3(1, TATank.enemyAngle1, 1);
         }
     }
     //public int judgeSelfPos(ManControl man)

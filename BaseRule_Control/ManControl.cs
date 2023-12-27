@@ -9,6 +9,7 @@ using System.Linq;
 public class ManControl : MonoBehaviour
 {
 	//用于测试与调试的public变量
+	public int pos = -1;
 	public float target_dis;
 	public int HillIndex = -1;
 	public int stopTime = -1;
@@ -42,15 +43,15 @@ public class ManControl : MonoBehaviour
 	public float SetFireSpeeed = 1;
 	public int startFlag = 0;
 	public bool speedControl;//控制坦克是否移动，用于测试	
-	
+
 	public float enemyAngle;
 	public float enemyAngle1;
 	public float setEnemyAngle1;
 
 	public class fireParameter
-    {
+	{
 
-    }
+	}
 
 	[Header("坦克对战相关距离角度设置")]
 	public float setAvoidDis = 20.0f;
@@ -120,7 +121,7 @@ public class ManControl : MonoBehaviour
 
 	public int LastMinNum;//上一次对手的ID
 	public int ResultMinNum;//通过EnemyJudge()算法判断出的对手ID
-	//[HideInInspector]
+							//[HideInInspector]
 	public int CountMinNum = 0;//锁定对手计数标志位，打完一轮后需要在gamemanage文件的reset函数内重置该标志位
 
 	public int RegularFlag = 0;//坦克拉扯攻击标志位
@@ -225,10 +226,10 @@ public class ManControl : MonoBehaviour
 			if (tankTeam == TankTeam.Tank_Red)
 			{
 				//计算基本信息
-				if(MinNum != -1 && MinNum != 0)
-                {
+				if (MinNum != -1 && MinNum != 0)
+				{
 					if (tankSpawner.useTA && tankSpawner.TAList[MinNum - 1].Isdead) switchtime = switchlimit + 1;
-					else if(!tankSpawner.useTA && tankSpawner.BlueAgentsList[MinNum - 1].Isdead) switchtime = switchlimit + 1;
+					else if (!tankSpawner.useTA && tankSpawner.BlueAgentsList[MinNum - 1].Isdead) switchtime = switchlimit + 1;
 				}
 				infoCalculate2.Calculate(this, transform);
 				if (!trainingSetting.RedTeam.HumanControl && (MinNum == -1 || switchtime > switchlimit))
@@ -245,13 +246,13 @@ public class ManControl : MonoBehaviour
 
 				}
 			}
-            else
-            {
-                //if (tankTeam == TankTeam.Tank_Blue)
-                    //MinNum = enemyJudge2.enemyList[TankNum];
-            }
+			else
+			{
+				//if (tankTeam == TankTeam.Tank_Blue)
+				//MinNum = enemyJudge2.enemyList[TankNum];
+			}
 
-            if (gameManage.round <= 100 || trainingSetting.EnvInfo.isTrainning)
+			if (gameManage.round <= 100 || trainingSetting.EnvInfo.isTrainning)
 			{
 				if (!trainingSetting.RedTeam.HumanControl)
 				{
@@ -680,34 +681,34 @@ public class ManControl : MonoBehaviour
 		shellAngle = shellAngle < 25.0f ? shellAngle : 25.0f;
 		shellAngle = shellAngle > -5.0f ? shellAngle : -5.0f;
 
-        //炮筒旋转
-        if (-(baseFunction2.angleOffset(cannon.localRotation.eulerAngles.x)) >= 0.0f)
-        {
-            if (shellAngle < 0)
-            {
-                cannon.Rotate(Vector3.right, 0.3f);
-            }
-            else if (shellAngle < -2)
-            {
-                cannon.Rotate(Vector3.right, 0.6f);
-            }
-        }
-        if (-(baseFunction2.angleOffset(cannon.localRotation.eulerAngles.x)) <= 35.0f)
-        {
-            if (shellAngle >= 2)
-            {
-                cannon.Rotate(-Vector3.right, 0.6f);
-            }
-            else if (shellAngle >= 0)
-            {
-                cannon.Rotate(-Vector3.right, 0.3f);
-            }
-        }
+		//炮筒旋转
+		if (-(baseFunction2.angleOffset(cannon.localRotation.eulerAngles.x)) >= -5.0f)
+		{
+			if (shellAngle < 0)
+			{
+				cannon.Rotate(Vector3.right, 0.3f);
+			}
+			else if (shellAngle < -2)
+			{
+				cannon.Rotate(Vector3.right, 0.6f);
+			}
+		}
+		if (-(baseFunction2.angleOffset(cannon.localRotation.eulerAngles.x)) <= 25.0f)
+		{
+			if (shellAngle >= 2)
+			{
+				cannon.Rotate(-Vector3.right, 0.6f);
+			}
+			else if (shellAngle >= 0)
+			{
+				cannon.Rotate(-Vector3.right, 0.3f);
+			}
+		}
 
 
-			//当炮筒旋转至设定角度后才能开炮
+		//当炮筒旋转至设定角度后才能开炮
 		if (shell != null && flags == 1 && (firetime >= cooldowntime) && fire <= 40 &&
-		(fireFlag))//0.1为一个补偿值，因为炮筒角度不能真正达到设定角度，只能无限逼近
+			enemyAngle1 < 0.5f)//0.1为一个补偿值，因为炮筒角度不能真正达到设定角度，只能无限逼近
 		{
 			CalFireCount = 0;
 			CalFireCount1 = 0;
@@ -722,21 +723,13 @@ public class ManControl : MonoBehaviour
 
 			if (shellRigidbody != null)
 			{
-				if (UnityEngine.Random.Range(0f, 1f) > 0.5f)
-				{
-					shellRigidbody.velocity = ShellPos.forward * 1400;
-				}
-				else
-                {
-					shellRigidbody.velocity = ShellPos.forward * 10;
-				}
+				shellRigidbody.velocity = ShellPos.forward * 1400;
 				shellObj.GetComponent<ShellControl>().Set_father(gameObject);
 			}
 			++fire;
 			firetime = 0;
 		}
-        
-		
+
 	}
 	//发射炮弹代码(炮筒可旋转)
 	public void OpenFire1(float shellSpeed, float shellAngle, int flags)
@@ -980,7 +973,7 @@ public class ManControl : MonoBehaviour
 		EnemyRot = new float[EnemyNum];
 		TeamMateDis = new float[TeamNum];
 		TeamMateRot = new float[TeamNum];
-		TeamMateSingleRot = new float[TeamNum];;
+		TeamMateSingleRot = new float[TeamNum]; ;
 		optimize_result = new float[2];
 
 		BackDistance = 400.0f;
