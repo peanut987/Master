@@ -92,9 +92,9 @@ public class FindEnemy : MonoBehaviour
         if (man.enemylive > 3)
             man.BackDistance = 700;
         else if (man.enemylive > 1 && man.enemylive <= 3)
-            man.BackDistance = 400;
+            man.BackDistance = 700;
         else
-            man.BackDistance = 400;
+            man.BackDistance = 700;
 
         if (!tankSpawner.useTA)
         {
