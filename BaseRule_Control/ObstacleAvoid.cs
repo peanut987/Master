@@ -51,7 +51,7 @@ public class ObstacleAvoid : MonoBehaviour
                     target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, -60, 30, 0);
                     break;
                 case 2:
-                    target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 60, 30, 0);
+                    target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 30, 30, 0);
                     break;
                 default:
                     target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 0, 30, 0);
@@ -120,7 +120,7 @@ public class ObstacleAvoid : MonoBehaviour
             isEnmey = false;
 
         if (((man.target_dis < man.BackDistance - 100 && man.firetime < 300)||
-        (man.speedControl == true && man.enemyDisXOZ < 150 && man.firetime > 300)) && man.rotateFlag != 1 && isEnmey)
+        (man.speedControl == true && man.enemyDisXOZ < 200 && man.firetime > 300)) && man.rotateFlag != 1 && isEnmey)
             man.relativespeed = -1.0f;
         EnemyDir = (target - transform.position).normalized;
         // EnemyDir = EnemyDir / 5;
