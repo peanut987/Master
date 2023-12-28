@@ -97,7 +97,7 @@ public class ObstacleAvoid : MonoBehaviour
                 else
                 {
                     roundTime = new float[] { 22, 20, 25, 25 };
-                    angle = new float[] { -60, 45 };
+                    angle = new float[] { -60, 30, 70, 70 };
                     dis = new float[] { 800, 100, 200 };
                 }
             }

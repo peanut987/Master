@@ -135,7 +135,7 @@ public class GameManage : MonoBehaviour
         TranningSetting = FindObjectOfType<TranningSetting>();
         findEnemy = FindObjectOfType<FindEnemy>();
         sceneSwitcher = FindObjectOfType<SceneSwitcher>();
-        RecordMode();//循环遍历
+        
         //如果找到配置文件
         if (TranningSetting)
         {
@@ -178,7 +178,7 @@ public class GameManage : MonoBehaviour
         UpdateTitle(SUM_RED, SUM_BLUE);
         //UnityEngine.Debug.Log("game tankSpawner.Biolist" + tankSpawner.Biolist.Count);
         //InitMapData();
-
+        setTimeScale(SUM_RED, SUM_BLUE);
         ResetScene();
 
     }
@@ -191,7 +191,10 @@ public class GameManage : MonoBehaviour
     {
         if (round >= 101)
         {
-            Time.timeScale = 0;
+            if(isRecord)
+                RecordMode();//循环遍历
+            else 
+                Time.timeScale = 0;
         }
         left_Step -= 1;
         RedScore = 0;
@@ -537,6 +540,12 @@ public class GameManage : MonoBehaviour
 
     }
 
+    public void setTimeScale(int redNum, int blueNum)
+    {
+        if (redNum == 5 && blueNum == 5) Time.timeScale = 15;
+        else Time.timeScale = 18;
+    }
+
     public void RecordMode()
     {
         ManControl man = FindObjectOfType<ManControl>();
@@ -544,11 +553,20 @@ public class GameManage : MonoBehaviour
         {
             if (round > RecordRounds)
             {
-                UnityEngine.Debug.Log(" Rounds: " + round + " Blue_win: " + Blue_win + " Red_win: " + Red_win + "  " + ((float)Red_win / (Red_win + Blue_win + Both_win)).ToString("f3") + "% " + "NUM_BIO: " 
+                UnityEngine.Debug.Log(" Rounds: " + (round - 1) + " Blue_win: " + Blue_win + " Red_win: " + Red_win + "  " + ((float)Red_win / (Red_win + Blue_win + Both_win)).ToString("f3") + "% " + "NUM_BIO: " 
                     + TranningSetting.RedTeam.nums + " NUM_RL: " + TranningSetting.BlueTeam.nums + " eff: " + eff);
-                round = 0;
+                //对局重置时数据初始化
+                round = 1;
                 Blue_win = 0;
                 Red_win = 0;
+                Both_win = 0;
+                BIO_PH_Loss = 0;
+                BIO_PH_Cacul_Loss = 0;
+                BIO_Dead_Num = 0;
+                BIO_Dead_Cacul_Num = 0;
+
+                SUM_RED = TranningSetting.RedTeam.nums;
+                SUM_BLUE = TranningSetting.BlueTeam.nums;
                 //Time.timeScale = 0;//新增，100回合暂停
                 if (TranningSetting.RedTeam.nums == 5)
                 {
@@ -586,6 +604,17 @@ public class GameManage : MonoBehaviour
                     }
 
                 }
+                foreach (var item in tankSpawner.Biolist)
+                {
+                    if(item.TankNum > TranningSetting.RedTeam.nums) item.gameObject.SetActive(false);
+                    else item.gameObject.SetActive(true);
+                }
+                foreach (var item in tankSpawner.TAList)
+                {
+                    if (item.TankNum + 1 > TranningSetting.BlueTeam.nums) item.gameObject.SetActive(false);
+                    else item.gameObject.SetActive(true);
+                }
+
                 man.cannon_script2.setRadius(TranningSetting.RedTeam.nums, TranningSetting.BlueTeam.nums, tankSpawner.useTA, TranningSetting.algorithmSelect.BioOptimized);
                 man.findEnemy2.setDis(TranningSetting.RedTeam.nums, TranningSetting.BlueTeam.nums, tankSpawner.useTA, TranningSetting.algorithmSelect.BioOptimized);
                 man.obstacleAvoid2.setParameter(TranningSetting.RedTeam.nums, TranningSetting.BlueTeam.nums, tankSpawner.useTA, TranningSetting.algorithmSelect.BioOptimized);
