@@ -9,6 +9,9 @@ public class ObstacleAvoid : MonoBehaviour
     public TranningSetting trainingSetting;
     public int teamnum, enemynum;
     public float[] roundTime = new float[4];
+    public float[] angle = new float[4];//对局开始时个体向左或者向右的转向角度
+    public float[] dis = new float[3];
+    public float[] speed = new float[2];
     private RaycastHit hit;
     //private Vector3 MoveDir, MoveDir1, TeamMateDir, OtherEnemyDir = Vector3.zero;
     // Start is called before the first frame update
@@ -18,12 +21,121 @@ public class ObstacleAvoid : MonoBehaviour
         trainingSetting = FindObjectOfType<TranningSetting>();
         teamnum = trainingSetting.RedTeam.nums;
         enemynum = trainingSetting.BlueTeam.nums;
-        if(teamnum == 3)
+        setParameter(trainingSetting.RedTeam.nums, trainingSetting.BlueTeam.nums, tankSpawner.useTA, trainingSetting.algorithmSelect.BioOptimized);
+        if (teamnum == 3)
             roundTime = new float[] { 22, 20, 25, 22 };
         else if(teamnum > 3)
             roundTime = new float[] { 5, 20, 15, 5 };//91:6 5、15、5、5
          
 
+    }
+
+     public void setParameter(int redNum, int blueNum, bool isNR, bool isOptimized)
+    {
+        if(isNR)
+        {
+            if (redNum == 3 && blueNum == 3)
+            {
+                if(isOptimized)
+                {
+                    roundTime = new float[] { 20, 20, 22, 25 };
+                    angle = new float[] { -60, 60, 70, -70 };
+                    dis = new float[] { 800, 100, 300 };
+                    speed = new float[] { 0.2f, 0.2f };
+                }
+                else
+                {
+                    roundTime = new float[] { 15, 20, 20, 22 };
+                    angle = new float[] { -60, 60, 45, -45 };
+                    dis = new float[] { 800, 100, 200 };
+                    speed = new float[] { 0.2f, 0.2f };
+                }
+            }
+            else if (redNum == 3 && blueNum == 4)
+            {
+                if (isOptimized)
+                {
+                    roundTime = new float[] { 15, 20, 25, 25 };
+                    angle = new float[] { -60, 60, 70, -70 };
+                    dis = new float[] { 800, 100, 300 };
+                    speed = new float[] { 0.2f, 0.2f };
+                }
+                else
+                {
+                    roundTime = new float[] { 15, 20, 25, 25 };
+                    angle = new float[] { -60, 60, 45, -45 };
+                    dis = new float[] { 800, 100, 100 };
+                    speed = new float[] { 0.2f, 0.2f };
+                }
+            }
+            else if (redNum == 3 && blueNum == 5)
+            {
+                if (isOptimized)
+                {
+                    roundTime = new float[] { 25, 15, 15, 15 };
+                    angle = new float[] { -60, 60, 70, -70 };
+                    dis = new float[] { 800, 100, 200 };
+                    speed = new float[] { 0.1f, 0.2f };
+                }
+                else
+                {
+                    roundTime = new float[] { 15, 20, 20, 22 };
+                    angle = new float[] { -60, 60, 45, -45 };
+                    dis = new float[] { 800, 100, 200 };
+                    speed = new float[] { 0.2f, 0.2f };
+                }
+            }
+            else if (redNum == 4 && blueNum == 3)
+            {
+                if (isOptimized)
+                {
+                    roundTime = new float[] { 5, 20, 15, 5 };
+                    angle = new float[] { -45, 30, 45, -45};
+                    dis = new float[] { 1000, 200, 200 };
+                    speed = new float[] { 0.1f, 0.2f };
+                }
+                else
+                {
+                    roundTime = new float[] { 22, 20, 25, 25 };
+                    angle = new float[] { -60, 45 };
+                    dis = new float[] { 800, 100, 200 };
+                }
+            }
+            else if (redNum == 5 && blueNum == 3)
+            {
+                if (isOptimized)
+                {
+                    roundTime = new float[] { 15, 20, 15, 15 }; ;
+                    angle = new float[] { -60, 60, 70, -70 };
+                    dis = new float[] { 800, 100, 150 };
+                    speed = new float[] { 0.1f, 0.2f };
+                }
+                else
+                {
+                    roundTime = new float[] { 22, 20, 25, 25 };
+                    angle = new float[] { -60, 45, 70, -70 };
+                    dis = new float[] { 800, 100, 300 };
+                    speed = new float[] { 0.2f, 0.2f };
+                }
+            }
+            else if (redNum == 5 && blueNum == 5)
+            {
+                if (isOptimized)
+                {
+                    roundTime = new float[] { 5, 20, 5, 5 };
+                    angle = new float[] { -60, 60, 45, -45 };
+                    dis = new float[] {800, 100, 200};
+                    speed = new float[] { 0.1f, 0.2f };
+                }
+                else
+                {
+                    roundTime = new float[] { 22, 20, 25, 25 };
+                    angle = new float[] { -60, 45, 70, -70 };
+                    dis = new float[] { 800, 100, 300 };
+                    speed = new float[] { 0.2f, 0.2f };
+                }
+            }
+        }
     }
 
     //通过计算每个障碍物对坦克的合力求出运行方向，如果不再避障范围，则作用力为零，距离越小作用力越大
@@ -39,6 +151,8 @@ public class ObstacleAvoid : MonoBehaviour
 
         man.target_dis = isEnmey ? Vector3.Distance(target, transform.position) : 3000.0f;
 
+        
+
         if ((GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[0] && man.gameManage.round % 4 == 0)
             ||(GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[1] && man.gameManage.round % 4 == 1)
             || (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[2] && man.gameManage.round % 4 == 2)
@@ -47,23 +161,69 @@ public class ObstacleAvoid : MonoBehaviour
             switch (man.findEnemy2.judgeSelfPosToCenter(man))
             {
                 case 1:
-                    target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, -45, 30, 0);
+                    target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, angle[0], 30, 0);
                     break;
                 case 2:
-                    target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 30, 30, 0);
+                    target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, angle[1], 30, 0);
                     break;
                 default:
                     target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 0, 30, 0);
-                    man.relativespeed = 0.1f;
+                    man.relativespeed = speed[0];
                     break;
             }
         }
         else
             man.relativespeed = 1.0f;
 
+        if(trainingSetting.RedTeam.nums == 3 && trainingSetting.BlueTeam.nums == 5)
+        {
+            if ((GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[1] && man.gameManage.round % 4 == 1)
+            || (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[2] && man.gameManage.round % 4 == 2))
+            {
+                man.pos = man.findEnemy2.judgeSelfPosToCenter(man);
+                switch (man.findEnemy2.judgeSelfPosToCenter(man))
+                {
+                    case 1:
+                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, -45, 30, 0);
+                        man.relativespeed = 1.0f;
+                        break;
+                    case 2:
+                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 45, 30, 0);
+                        man.relativespeed = 1.0f;
+                        break;
+                    default:
+                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 0, 30, 0);
+                        man.relativespeed = speed[0];
+                        break;
+                }
+            }
+            else if ((GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[0] && man.gameManage.round % 4 == 0)
+                    || (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[3] && man.gameManage.round % 4 == 3))
+            {
+                switch (man.findEnemy2.judgeSelfPosToCenter(man))
+                {
+                    case 1:
+                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, -angle[0], 30, 0);
+                        man.relativespeed = 1.0f;
+                        break;
+                    case 2:
+                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, angle[1], 30, 0);
+                        man.relativespeed = 1.0f;
+                        break;
+                    default:
+                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 0, 30, 0);
+                        man.relativespeed = speed[0];
+                        break;
+                }
+            }
+            else
+                man.relativespeed = 1.0f;
+
+        }
+
         if ((target == (!tankSpawner.useTA ? tankSpawner.BlueAgentsList[man.MinNum - 1].transform.position : tankSpawner.TAList[man.MinNum - 1].transform.position)) && isEnmey)
         {
-            if (((man.target_dis < man.BackDistance && man.target_dis > man.BackDistance - 50) || man.rotateFlag == 1 || (man.firetime < man.cooldowntime && man.enemyDisXOZ < 1000 && man.target_dis > man.BackDistance)))
+            if (((man.target_dis < man.BackDistance && man.target_dis > man.BackDistance - 50) || man.rotateFlag == 1 || (man.firetime < man.cooldowntime && man.enemyDisXOZ < dis[0] && man.target_dis > man.BackDistance)))
             {
                 switch (man.findEnemy2.judgeSelfPosToCenter(man))
                 {
@@ -75,7 +235,7 @@ public class ObstacleAvoid : MonoBehaviour
                         break;
                     default:
                         target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 0, 30, 0);
-                        man.relativespeed = 0.2f;
+                        man.relativespeed = speed[1];
                         break;
                 }
             }
@@ -85,10 +245,10 @@ public class ObstacleAvoid : MonoBehaviour
                 switch (man.findEnemy2.judgeSelfPosToCenter(man))
                 {
                     case 1:
-                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 45, 30, 0);
+                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, angle[2], 30, 0);
                         break;
                     case 2:
-                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, -45, 30, 0);
+                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, angle[3], 30, 0);
                         break;
                     default:
                         target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 0, 30, 0);
@@ -104,8 +264,8 @@ public class ObstacleAvoid : MonoBehaviour
         else
             isEnmey = false;
 
-        if (((man.target_dis < man.BackDistance - 200 && man.firetime < 300)||
-        (man.speedControl == true && man.enemyDisXOZ < 200 && man.firetime > 300)) && man.rotateFlag != 1 && isEnmey)
+        if (((man.target_dis < man.BackDistance - dis[1] && man.firetime < 300)||
+        (man.speedControl == true && man.enemyDisXOZ < dis[2] && man.firetime > 300)) && man.rotateFlag != 1 && isEnmey)
             man.relativespeed = -1.0f;
         EnemyDir = (target - transform.position).normalized;
 

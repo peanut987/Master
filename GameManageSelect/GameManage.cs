@@ -62,6 +62,11 @@ public class GameManage : MonoBehaviour
 
     //对局总数
     public int round = 1;
+    public int RecordRounds = 100;
+
+    public float eff;
+
+    public bool isRecord;
 
     //对局胜场统计
     public int Blue_win = 0;
@@ -130,6 +135,7 @@ public class GameManage : MonoBehaviour
         TranningSetting = FindObjectOfType<TranningSetting>();
         findEnemy = FindObjectOfType<FindEnemy>();
         sceneSwitcher = FindObjectOfType<SceneSwitcher>();
+        RecordMode();//循环遍历
         //如果找到配置文件
         if (TranningSetting)
         {
@@ -172,6 +178,7 @@ public class GameManage : MonoBehaviour
         UpdateTitle(SUM_RED, SUM_BLUE);
         //UnityEngine.Debug.Log("game tankSpawner.Biolist" + tankSpawner.Biolist.Count);
         //InitMapData();
+
         ResetScene();
 
     }
@@ -530,6 +537,62 @@ public class GameManage : MonoBehaviour
 
     }
 
+    public void RecordMode()
+    {
+        ManControl man = FindObjectOfType<ManControl>();
+        if (isRecord)
+        {
+            if (round > RecordRounds)
+            {
+                UnityEngine.Debug.Log(" Rounds: " + round + " Blue_win: " + Blue_win + " Red_win: " + Red_win + "  " + ((float)Red_win / (Red_win + Blue_win + Both_win)).ToString("f3") + "% " + "NUM_BIO: " 
+                    + TranningSetting.RedTeam.nums + " NUM_RL: " + TranningSetting.BlueTeam.nums + " eff: " + eff);
+                round = 0;
+                Blue_win = 0;
+                Red_win = 0;
+                //Time.timeScale = 0;//新增，100回合暂停
+                if (TranningSetting.RedTeam.nums == 5)
+                {
+                    if (TranningSetting.BlueTeam.nums == 5)
+                    {
+                        TranningSetting.BlueTeam.nums = 3;
+                    }
+                    else
+                    {
+                        TranningSetting.RedTeam.nums = 4;
+                    }
+                }
+                else if (TranningSetting.RedTeam.nums == 4)
+                {
+                    if (TranningSetting.BlueTeam.nums == 3)
+                    {
+                        TranningSetting.RedTeam.nums = 3;
+                        TranningSetting.BlueTeam.nums = 5;
+                    }
+                }
+                else if (TranningSetting.RedTeam.nums == 3)
+                {
+                    if (TranningSetting.BlueTeam.nums == 5)
+                    {
+                        TranningSetting.BlueTeam.nums = 4;
+                    }
+                    else if (TranningSetting.BlueTeam.nums == 4)
+                    {
+                        TranningSetting.BlueTeam.nums = 3;
+                    }
+                    else if (TranningSetting.BlueTeam.nums == 3)
+                    {
+                        TranningSetting.RedTeam.nums = 5;
+                        TranningSetting.BlueTeam.nums = 5;
+                    }
+
+                }
+                man.cannon_script2.setRadius(TranningSetting.RedTeam.nums, TranningSetting.BlueTeam.nums, tankSpawner.useTA, TranningSetting.algorithmSelect.BioOptimized);
+                man.findEnemy2.setDis(TranningSetting.RedTeam.nums, TranningSetting.BlueTeam.nums, tankSpawner.useTA, TranningSetting.algorithmSelect.BioOptimized);
+                man.obstacleAvoid2.setParameter(TranningSetting.RedTeam.nums, TranningSetting.BlueTeam.nums, tankSpawner.useTA, TranningSetting.algorithmSelect.BioOptimized);
+                
+            }
+        }
+    }
 
     public Vector3[] setPosition(int rounds, int tankNum, TankTeam tankTeam, bool changePos, List<Vector3> BornPointRed, List<Vector3> BornPointBlue, int scale1 = 60, int scale2 = 60, int size = 5)
     {
@@ -1115,6 +1178,7 @@ public class GameManage : MonoBehaviour
         float a1 = (float)BIO_Dead_Cacul_Num / (Red_win * TranningSetting.RedTeam.nums);
         float a2 = (float)BIO_PH_Cacul_Loss / (Red_win * TranningSetting.RedTeam.nums * man.PHFULL);
 
+        eff = (1 / (a1 + 0.1f)) * 0.5f +(1 / (a2 + 0.1f)) * 0.5f;
         if (!TranningSetting.RedTeam.HumanControl && !TranningSetting.BlueTeam.HumanControl)
             TextList[5].text = "红方效益指标: " + ((1 / (a1 + 0.1f)) * 0.5f +
              (1 / (a2 + 0.1f)) * 0.5f).ToString("f3");

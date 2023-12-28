@@ -53,8 +53,11 @@ public class TranningSetting : MonoBehaviour
     [System.Serializable]
     public class AlgorithmSelect
     {
-        [Tooltip("是否选择仿生规则算法")]
+        [Tooltip("是否选择仿生规则基础算法")]
         public bool BioGeneral = false;
+
+        [Tooltip("是否选择仿生规则优化算法")]
+        public bool BioOptimized = false;
 
         [Tooltip("是否选择论文对照就近分配对手算法")]
         public bool NRStandard = false;

@@ -39,7 +39,7 @@ public class Cannon : MonoBehaviour
 			cannon_line.endWidth = 0.5f;
 			castDis = 1250.0f;
 		}
-
+		setRadius(manControl.trainingSetting.RedTeam.nums, manControl.trainingSetting.BlueTeam.nums, tankSpawner.useTA, manControl.trainingSetting.algorithmSelect.BioOptimized);
 		ColliderFlag = false;
 	}
 
@@ -150,6 +150,46 @@ public class Cannon : MonoBehaviour
 			else
 				cannon_line.enabled = false;
 
+		}
+	}
+
+	public void setRadius(int redNum, int blueNum, bool isNR, bool isOptimized)
+	{
+		if (isNR)
+		{
+			if ((redNum == 3 && blueNum == 3) || (redNum == 3 && blueNum == 4) || (redNum == 3 && blueNum == 5))
+			{
+				if (isOptimized)
+				{
+					sphereRadius = 0.7f;
+				}
+				else
+				{
+					sphereRadius = 0.7f;
+				}
+			}
+			else if (redNum == 4 && blueNum == 3)
+			{
+				if (isOptimized)
+				{
+					sphereRadius = 0.8f;
+				}
+				else
+				{
+					sphereRadius = 0.8f;
+				}
+			}
+			else if ((redNum == 5 && blueNum == 3) || (redNum == 5 && blueNum == 5))
+			{
+				if (isOptimized)
+				{
+					sphereRadius = 0.7f;
+				}
+				else
+				{
+					sphereRadius = 1.0f;
+				}
+			}
 		}
 	}
 }

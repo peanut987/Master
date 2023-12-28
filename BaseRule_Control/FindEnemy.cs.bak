@@ -12,19 +12,55 @@ public class FindEnemy : MonoBehaviour
     public BaseFunction baseFunction2;
     public ObstacleAvoid obstacleAvoid2;
     public PathOptimize pathOptimize2;
-    public TranningSetting trainingSetting;
     public float BackDistance = 50;//后撤距离
-    public float AmbushDis = 600;//埋伏距离
     private RaycastHit hit;
 
+    [System.Serializable]
+    public class K_Means_Group_Info
+    {
+        public Vector3 Average = Vector3.zero;//组的中心点
+        public Vector3 Last_Frame_Average = Vector3.zero;//上一帧组的中心点
+        public List<int> Group = new List<int>();//各组坦克 存的是敌方坦克编号 
+        public float Group_avg_dist = 0;//各组距离误差 
+        public float Group_max_dist = 0;
+        public float Average_angle = 0;//从本组中心点到另一组组中心点的角度 x-z二维平面 x-y替换成x-z
+        public float dist_Average_to_central = 0;//本组中心点到交界带的距离
+        public Vector3 Central_SpecialPoint = Vector3.zero;//交界带特征点
+        public void Clear()
+        {
+            this.Average = Vector3.zero;
+            this.Group.Clear();
+            this.Group_avg_dist = 0;
+            this.Group_max_dist = 0;
+            this.dist_Average_to_central = 0;
+        }
+    }
+
+    [System.Serializable]
+
+    public class Move_In_Group_Info
+    {
+        public int team_num = 0;//攻方侧边个数
+        public List<int> Group = new List<int>();//各组坦克 存的是敌方坦克编号 //这四个不能直接拖到函数外public显示 需复制
+        public int leader_num = 0;//领队坦克编号
+        public Vector3 target = Vector3.zero;
+        public bool arrive = false;
+
+        public void Clear()
+        {
+            Group.Clear();
+            arrive = false;
+        }
+
+
+    }
     void Start()
     {
         tankSpawner = FindObjectOfType<TankSpawner>();
         baseFunction2 = FindObjectOfType<BaseFunction>();
         obstacleAvoid2 = FindObjectOfType<ObstacleAvoid>();
         pathOptimize2 = FindObjectOfType<PathOptimize>();
-        trainingSetting = FindObjectOfType<TranningSetting>();
-        setDis(trainingSetting.RedTeam.nums, trainingSetting.BlueTeam.nums, tankSpawner.useTA, trainingSetting.algorithmSelect.BioOptimized);
+        BackDistance = 45;
 
 
     }
@@ -43,92 +79,6 @@ public class FindEnemy : MonoBehaviour
 
     public float radius = 2000.0f; // 圆的半径
                                    //寻找并攻击敌军
-                                   
-    public void setDis(int redNum, int blueNum, bool isNR, bool isOptimized)
-    {
-    	if(isNR)
-    	{
-            if (redNum == 3 && blueNum == 3)
-            {
-                if (isOptimized)
-                {
-                    BackDistance = 600;
-                    AmbushDis = 100;
-                }
-                else
-                {
-                    BackDistance = 500;
-                    AmbushDis = 300;
-                }
-            }
-            else if (redNum == 3 && blueNum == 4)
-            {
-                if (isOptimized)
-                {
-                    BackDistance = 700;
-                    AmbushDis = 100;
-                }
-                else
-                {
-                    BackDistance = 600;
-                    AmbushDis = 500;
-                }
-            }
-            else if (redNum == 3 && blueNum == 5)
-            {
-                if (isOptimized)
-                {
-                    BackDistance = 500;
-                    AmbushDis = 100;
-                }
-                else
-                {
-                    BackDistance = 500;
-                    AmbushDis = 300;
-                }
-            }
-            else if (redNum == 4 && blueNum == 3)
-            {
-                if (isOptimized)
-                {
-                    BackDistance = 700;
-                    AmbushDis = 0;
-                }
-                else
-                {
-                    BackDistance = 400;
-                    AmbushDis = 0;
-                }
-            }
-            else if (redNum == 5 && blueNum == 3)
-            {
-                if (isOptimized)
-                {
-                    BackDistance = 500;
-                    AmbushDis = 0;
-                }
-                else
-                {
-                    BackDistance = 400;
-                    AmbushDis = 350;
-                }
-            }
-            else if (redNum == 5 && blueNum == 5)
-            {
-                if (isOptimized)
-                {
-                    BackDistance = 600;
-                    AmbushDis = 0;
-                }
-                else
-                {
-                    BackDistance = 400;
-                    AmbushDis = 350;
-                }
-            }
-        }
-    }
-    
     public void Scout(ManControl man, Transform transform)
     {
         float t = 0.01f;
@@ -141,9 +91,9 @@ public class FindEnemy : MonoBehaviour
         if (man.enemylive > 3)
             man.BackDistance = 700;
         else if (man.enemylive > 1 && man.enemylive <= 3)
-            man.BackDistance = BackDistance;
+            man.BackDistance = 700;
         else
-            man.BackDistance = BackDistance;
+            man.BackDistance = 700;
 
         if (!tankSpawner.useTA)
         {
@@ -248,7 +198,7 @@ public class FindEnemy : MonoBehaviour
         t = 0.0f;
         t = Mathf.Clamp01(t + (Time.deltaTime * 1.0f));
 
-        if (((man.cannon_script2.ColliderFlag || (judgeCannonCast(man.BioEnemydir, man.BioEnemydirTA, man) && man.enemyDisXOZ < AmbushDis)) && man.firetime >= man.cooldowntime))
+        if (((man.cannon_script2.ColliderFlag || (judgeCannonCast(man.BioEnemydir, man.BioEnemydirTA, man) && man.enemyDisXOZ < 0)) && man.firetime >= man.cooldowntime))
         {
             man.speedControl = false;
             man.ControlFlag = false;
