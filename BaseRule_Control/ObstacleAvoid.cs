@@ -39,7 +39,6 @@ public class ObstacleAvoid : MonoBehaviour
 
         man.target_dis = isEnmey ? Vector3.Distance(target, transform.position) : 3000.0f;
 
-        //target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 90, 30, 0);
         if ((GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[0] && man.gameManage.round % 4 == 0)
             ||(GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[1] && man.gameManage.round % 4 == 1)
             || (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[2] && man.gameManage.round % 4 == 2)
@@ -66,7 +65,6 @@ public class ObstacleAvoid : MonoBehaviour
         {
             if (((man.target_dis < man.BackDistance && man.target_dis > man.BackDistance - 50) || man.rotateFlag == 1 || (man.firetime < man.cooldowntime && man.enemyDisXOZ < 1000 && man.target_dis > man.BackDistance)))
             {
-                //target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 90, 30, 0);
                 switch (man.findEnemy2.judgeSelfPosToCenter(man))
                 {
                     case 1:
@@ -100,19 +98,6 @@ public class ObstacleAvoid : MonoBehaviour
             }
         }
 
-
-        //if(Mathf.Max(man.TeamMateSingleRot) < 70)
-        //{
-        //    if (man.TankNum == 1 || man.TankNum == 2) target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, -90, 30);
-        //    else if(man.TankNum == 3) man.relativespeed = 0.1f;
-        //    else if (man.TankNum == 4 || man.TankNum == 5) target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 90, 30);
-
-        //}
-        //if((man.target_dis < man.BackDistance - 50 && man.firetime < 300) ||
-        //        (man.speedControl == true && man.enemyDisXOZ < 200 && man.firetime > 300))
-        //    EnemyDir = (transform.position - target).normalized;
-        //else EnemyDir = (target - transform.position).normalized;
-
         if (target == (tankSpawner.useTA ? tankSpawner.TAList[man.MinNum - 1].transform.position :
      tankSpawner.BlueAgentsList[man.MinNum - 1].transform.position))
             isEnmey = true;
@@ -123,9 +108,7 @@ public class ObstacleAvoid : MonoBehaviour
         (man.speedControl == true && man.enemyDisXOZ < 200 && man.firetime > 300)) && man.rotateFlag != 1 && isEnmey)
             man.relativespeed = -1.0f;
         EnemyDir = (target - transform.position).normalized;
-        // EnemyDir = EnemyDir / 5;
 
-        //EnemyDir = new Vector3(EnemyDir.x, EnemyDir.y + 2, EnemyDir.z) ;
         //求队友对自身的合力
         for (int i = 0; i < teamnum; i++)
         {
@@ -137,8 +120,6 @@ public class ObstacleAvoid : MonoBehaviour
             {
                 if ((man.MinNum == -1) && tankSpawner.Biolist[i].transform.position != target)
                 {
-                    //if(man.TankNum == 16)print("avoid");
-                    //if (man.TankNum == 7) print(TeamMateDis);
                     TeamMateDir = (transform.position - tankSpawner.Biolist[i].transform.position).normalized/
                         Vector3.Distance(transform.position, tankSpawner.Biolist[i].transform.position);
                 }
@@ -154,22 +135,9 @@ public class ObstacleAvoid : MonoBehaviour
                 
             MoveDir1 += TeamMateDir;
         }
+  
+        MoveDir = (MoveDir1 + EnemyDir / man.target_dis + ObstacleVector(man, 22.5f, 40)).normalized;
 
-        //if(MoveDir1 != Vector3.zero)
-        //{
-        //    man.relativespeed = man.relativespeed > 0 ? 0.8f : man.relativespeed;
-        //}
-        //else
-        //{
-        //    man.relativespeed = man.relativespeed > 0 ? 1.0f : man.relativespeed;
-        //}
-
-        //if(man.firetime > man.cooldowntime)
-        //    MoveDir = (MoveDir1 + EnemyDir / man.target_dis).normalized;
-        //else
-            MoveDir = (MoveDir1 + EnemyDir / man.target_dis + ObstacleVector(man, 22.5f, 40)).normalized;
-
-        //MoveDir = new Vector3(MoveDir.x, MoveDir.y + 2, MoveDir.z);
         return MoveDir;
     }
 

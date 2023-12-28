@@ -81,7 +81,6 @@ public class FindEnemy : MonoBehaviour
                                    //寻找并攻击敌军
     public void Scout(ManControl man, Transform transform)
     {
-        //if (man.TeamNum >= 20) FindTopPoints(man);//派出坦克占领高地
         float t = 0.01f;
         Vector3 target;
         man.OpenFireDis = 2000.0f;//设置开火范围
@@ -107,7 +106,7 @@ public class FindEnemy : MonoBehaviour
             man.Enemyinf[2] = TempRot[1];//右边为正左边为负值
 
 
-            //速度确定代码，当对手距离大于后撤距离则全速前进，小于后撤距离则以0.8倍最大速度后撤
+            
             man.enemyDisXOZ = baseFunction2.CalculateDisX0Z(man.transform.position, attackedEnemy.transform.position);
             if (!attackedEnemy.Isdead)
             {
@@ -181,16 +180,6 @@ public class FindEnemy : MonoBehaviour
             target2 = baseFunction2.Set_point(man.transform, target - man.transform.position, 90, 30);
         }
 
-
-        //if (man.MinNum != -1)
-        //{
-        //    man.NUM_Text.text = man.TankNum.ToString() + "-" + (man.MinNum).ToString();
-        //}
-        //else
-        //{
-        //    man.NUM_Text.text = "  " + man.TankNum.ToString();
-        //}
-
         int Rmask = LayerMask.GetMask("GroundLayer");
         man.target1 = target2;//通过target1能够在inspector直观显示锁定对手的位置信息
 
@@ -209,7 +198,7 @@ public class FindEnemy : MonoBehaviour
         t = 0.0f;
         t = Mathf.Clamp01(t + (Time.deltaTime * 1.0f));
 
-        if (((man.cannon_script2.ColliderFlag || (judgeCannonCast(man.BioEnemydir, man.BioEnemydirTA, man) && man.enemyDisXOZ < 600)) && man.firetime >= man.cooldowntime))
+        if (((man.cannon_script2.ColliderFlag || (judgeCannonCast(man.BioEnemydir, man.BioEnemydirTA, man) && man.enemyDisXOZ < 0)) && man.firetime >= man.cooldowntime))
         {
             man.speedControl = false;
             man.ControlFlag = false;
@@ -239,16 +228,16 @@ public class FindEnemy : MonoBehaviour
         //    man.rotateFlag = 0;
         //}
 
-        if (man.cannon_script2.ColliderFlag && man.firetime > man.cooldowntime)
-        {
-            man.speedControl = false;
-            man.ControlFlag = false;
-        }
-        else
-        {
-            man.ControlFlag = true;
-            man.speedControl = true;
-        }
+        //if (man.cannon_script2.ColliderFlag && man.firetime > man.cooldowntime)
+        //{
+        //    man.speedControl = false;
+        //    man.ControlFlag = false;
+        //}
+        //else
+        //{
+        //    man.ControlFlag = true;
+        //    man.speedControl = true;
+        //}
 
         if (man.RegularFlag == 0)
         {
@@ -283,10 +272,6 @@ public class FindEnemy : MonoBehaviour
                        man.enemyAngle : -man.enemyAngle;
             man.OpenFire2(1, man.enemyAngle1, 1);
         }
-
-
-        //attack_enemy(man);
-
 
     }
 

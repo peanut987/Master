@@ -20,15 +20,6 @@ using Unity.VisualScripting;
 
 public class GameManage : MonoBehaviour
 {
-    [System.Serializable]
-    public class PlayerInfo
-    {
-        public TankControl tank;
-        public float reward;
-        public float PH;
-        public bool IsDea;
-    }
-
     private int distanceFromEach;
 
     //引用脚本文件
@@ -72,6 +63,7 @@ public class GameManage : MonoBehaviour
     //对局总数
     public int round = 1;
 
+    //对局胜场统计
     public int Blue_win = 0;
     public int Red_win = 0;
     public int Both_win = 0;
@@ -95,26 +87,18 @@ public class GameManage : MonoBehaviour
     private List<Vector3[]> spawnLocations = new List<Vector3[]>();
     List<Vector3> spawnPositions = new List<Vector3>();
 
-    public Transform BornPointBlue1;
-    public Transform BornPointBlue2;
-    public Transform BornPointBlue3;
-    public Transform BornPointBlue4;
-
+    //对局位置生成列表
     public List<Vector3> BornPointRed = new List<Vector3>();
-
     public List<Vector3> BornPointBlue = new List<Vector3>();
 
-
-    public float Righttime = 30;
-    public int CalcDistanceTime = 0;
-
-    public List<int> Priority = new List<int>();
-    public bool is_training = true;
-    public Dictionary<int, List<float>> agentRewards = new();
-    public Transform TextPos;
-    public Transform Text;
-    public float[] TextScale = { 1.5f, 1, 3.5f, 1, 2 };//保存地图对应的文本生成大小
+    private List<int> Priority = new List<int>();
+    private Dictionary<int, List<float>> agentRewards = new();
+    private Transform Text;
+    private float[] TextScale = { 1.5f, 1, 3.5f, 1, 2 };//保存地图对应的文本生成大小
+    
+    public float Righttime = 30;//用于计时
     public int limitWaitTime = 500;//对局结束后延时时间，便于观察胜负
+    public bool is_training = true;
 
     public class MapInfo
     {
@@ -355,7 +339,8 @@ public class GameManage : MonoBehaviour
             else
             {
                 m_BlueAgentGroup.RegisterAgent(item);
-                //重置血条
+
+                //初始化血量
                 if (TranningSetting.RedTeam.nums == 5 && TranningSetting.BlueTeam.nums == 3)
                 {
                     item.PH = TranningSetting.BlueTeam.FULLPH * 2;
@@ -444,6 +429,7 @@ public class GameManage : MonoBehaviour
                     item.transform.forward = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[1];
                 }
 
+                //初始化血量
                 if (TranningSetting.RedTeam.nums == 3 && TranningSetting.BlueTeam.nums == 5)
                 {
                     item.PH = TranningSetting.RedTeam.FULLPH * 2;
@@ -499,7 +485,7 @@ public class GameManage : MonoBehaviour
                     item.transform.position = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[0];
                     item.transform.forward = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[1];
 
-
+                    //初始化血量
                     if (TranningSetting.RedTeam.nums == 5 && TranningSetting.BlueTeam.nums == 3)
                     {
                         item.PH = TranningSetting.BlueTeam.FULLPH * 2;
