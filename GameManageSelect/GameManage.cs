@@ -542,7 +542,7 @@ public class GameManage : MonoBehaviour
 
     public void setTimeScale(int redNum, int blueNum)
     {
-        if (redNum == 5 && blueNum == 5) Time.timeScale = 15;
+        if (redNum == 5 && blueNum == 5) Time.timeScale = 18;
         else Time.timeScale = 18;
     }
 
@@ -1150,22 +1150,26 @@ public class GameManage : MonoBehaviour
     {
         string BlueAlgorithm;
         string RedAlgorithm;
+        string isOptimized;
+
+        if (TranningSetting.algorithmSelect.BioOptimized) isOptimized = "-Optimized-";
+        else isOptimized = "-General-";
 
         if (TranningSetting.algorithmSelect.NRStandard && !TranningSetting.algorithmSelect.RLStandard)
         {
             if (TranningSetting.BlueTeam.nums == 3 && (TranningSetting.RedTeam.nums == 4 || TranningSetting.RedTeam.nums == 5))
             {
-                RedAlgorithm = "BIO-General-More";
+                RedAlgorithm = "BIO" + isOptimized + "More";
                 BlueAlgorithm = "NR-Standard-Less";
             }
             else if (TranningSetting.RedTeam.nums == 3 && (TranningSetting.BlueTeam.nums == 4 || TranningSetting.BlueTeam.nums == 5))
             {
-                RedAlgorithm = "BIO-General-Less";
+                RedAlgorithm = "BIO" + isOptimized + "Less";
                 BlueAlgorithm = "NR-Standard-More";
             }
             else
             {
-                RedAlgorithm = "BIO-General-Even";
+                RedAlgorithm = "BIO" + isOptimized + "Even";
                 BlueAlgorithm = "NR-Standard-Even";
             }
         }
@@ -1173,17 +1177,17 @@ public class GameManage : MonoBehaviour
         {
             if (TranningSetting.BlueTeam.nums == 3 && (TranningSetting.RedTeam.nums == 4 || TranningSetting.RedTeam.nums == 5))
             {
-                RedAlgorithm = "BIO-General-More";
+                RedAlgorithm = "BIO" + isOptimized + "More";
                 BlueAlgorithm = "RL-Standard-Less";
             }
             else if (TranningSetting.RedTeam.nums == 3 && (TranningSetting.BlueTeam.nums == 4 || TranningSetting.BlueTeam.nums == 5))
             {
-                RedAlgorithm = "BIO-General-Less";
+                RedAlgorithm = "BIO" + isOptimized + "Less";
                 BlueAlgorithm = "RL-Standard-More";
             }
             else
             {
-                RedAlgorithm = "BIO-General-Even";
+                RedAlgorithm = "BIO" + isOptimized + "Even";
                 BlueAlgorithm = "RL-Standard-Even";
             }
         }
@@ -1195,7 +1199,7 @@ public class GameManage : MonoBehaviour
 
 
 
-            ManControl man = FindAnyObjectByType<ManControl>();
+        ManControl man = FindAnyObjectByType<ManControl>();
         TextList[1].text = "场次: " + (round - 1).ToString() + " / 100 ";// + ((float)Red_win / (Red_win + Blue_win)).ToString("f3");// + " - " +
 
         TextList[2].text = "红方当前存活: " + num_Red.ToString();
