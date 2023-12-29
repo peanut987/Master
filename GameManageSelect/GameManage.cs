@@ -542,7 +542,7 @@ public class GameManage : MonoBehaviour
 
     public void setTimeScale(int redNum, int blueNum)
     {
-        if (redNum == 5 && blueNum == 5) Time.timeScale = 18;
+        if (redNum == 5 && blueNum == 5) Time.timeScale = 15;
         else Time.timeScale = 18;
     }
 

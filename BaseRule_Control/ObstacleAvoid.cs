@@ -22,10 +22,10 @@ public class ObstacleAvoid : MonoBehaviour
         teamnum = trainingSetting.RedTeam.nums;
         enemynum = trainingSetting.BlueTeam.nums;
         setParameter(trainingSetting.RedTeam.nums, trainingSetting.BlueTeam.nums, tankSpawner.useTA, trainingSetting.algorithmSelect.BioOptimized);
-        if (teamnum == 3)
-            roundTime = new float[] { 22, 20, 25, 22 };
-        else if(teamnum > 3)
-            roundTime = new float[] { 5, 20, 15, 5 };//91:6 5、15、5、5
+        //if (teamnum == 3)
+        //    roundTime = new float[] { 22, 20, 25, 22 };
+        //else if(teamnum > 3)
+        //    roundTime = new float[] { 5, 20, 15, 5 };//91:6 5、15、5、5
          
 
     }
@@ -124,15 +124,19 @@ public class ObstacleAvoid : MonoBehaviour
                 {
                     roundTime = new float[] { 5, 20, 5, 5 };
                     angle = new float[] { -60, 60, 45, -45 };
-                    dis = new float[] {800, 100, 200};
+                    dis = new float[] { 800, 100, 200 };
                     speed = new float[] { 0.1f, 0.2f };
+                    //roundTime = new float[] { 5, 20, 15, 5 };
+                    //angle = new float[] { -60, 60, 45, -45 };
+                    //dis = new float[] { 1000, 200, 200 };
+                    //speed = new float[] { 0.1f, 0.2f };
                 }
                 else
                 {
-                    roundTime = new float[] { 22, 20, 25, 25 };
+                    roundTime = new float[] { 22, 22, 25, 25 };
                     angle = new float[] { -60, 45, 70, -70 };
-                    dis = new float[] { 800, 100, 300 };
-                    speed = new float[] { 0.2f, 0.2f };
+                    dis = new float[] { 800, 100, 200 };
+                    speed = new float[] { 0.1f, 0.2f };
                 }
             }
         }

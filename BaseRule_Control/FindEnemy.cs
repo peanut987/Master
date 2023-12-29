@@ -123,7 +123,7 @@ public class FindEnemy : MonoBehaviour
                 else
                 {
                     BackDistance = 400;
-                    AmbushDis = 350;
+                    AmbushDis = 250;
                 }
             }
         }
