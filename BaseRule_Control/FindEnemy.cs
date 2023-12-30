@@ -13,7 +13,8 @@ public class FindEnemy : MonoBehaviour
     public ObstacleAvoid obstacleAvoid2;
     public PathOptimize pathOptimize2;
     public TranningSetting trainingSetting;
-    public float BackDistance = 50;//后撤距离
+    public float BackDistance1 = 50;//后撤距离
+    public float BackDistance2 = 50;//后撤距离
     public float AmbushDis = 600;//埋伏距离
     private RaycastHit hit;
 
@@ -48,16 +49,17 @@ public class FindEnemy : MonoBehaviour
     {
     	if(isNR)
     	{
+            BackDistance1 = 700;
             if (redNum == 3 && blueNum == 3)
             {
                 if (isOptimized)
                 {
-                    BackDistance = 600;
+                   BackDistance2 = 600;
                     AmbushDis = 100;
                 }
                 else
                 {
-                    BackDistance = 500;
+                   BackDistance2 = 500;
                     AmbushDis = 300;
                 }
             }
@@ -65,12 +67,12 @@ public class FindEnemy : MonoBehaviour
             {
                 if (isOptimized)
                 {
-                    BackDistance = 700;
-                    AmbushDis = 100;
+                   BackDistance2 = 800;
+                    AmbushDis = 0;
                 }
                 else
                 {
-                    BackDistance = 600;
+                   BackDistance2 = 600;
                     AmbushDis = 500;
                 }
             }
@@ -78,12 +80,12 @@ public class FindEnemy : MonoBehaviour
             {
                 if (isOptimized)
                 {
-                    BackDistance = 500;
+                   BackDistance2 = 500;
                     AmbushDis = 100;
                 }
                 else
                 {
-                    BackDistance = 500;
+                   BackDistance2 = 500;
                     AmbushDis = 300;
                 }
             }
@@ -91,12 +93,12 @@ public class FindEnemy : MonoBehaviour
             {
                 if (isOptimized)
                 {
-                    BackDistance = 700;
+                   BackDistance2 = 700;
                     AmbushDis = 0;
                 }
                 else
                 {
-                    BackDistance = 400;
+                   BackDistance2 = 400;
                     AmbushDis = 0;
                 }
             }
@@ -104,12 +106,12 @@ public class FindEnemy : MonoBehaviour
             {
                 if (isOptimized)
                 {
-                    BackDistance = 500;
+                   BackDistance2 = 500;
                     AmbushDis = 0;
                 }
                 else
                 {
-                    BackDistance = 400;
+                   BackDistance2 = 400;
                     AmbushDis = 350;
                 }
             }
@@ -117,13 +119,14 @@ public class FindEnemy : MonoBehaviour
             {
                 if (isOptimized)
                 {
-                    BackDistance = 600;
+                    BackDistance1 = 800;
+                    BackDistance2 = 600;
                     AmbushDis = 0;
                 }
                 else
                 {
-                    BackDistance = 400;
-                    AmbushDis = 250;
+                   BackDistance2 = 700;
+                    AmbushDis = 450;
                 }
             }
         }
@@ -139,11 +142,11 @@ public class FindEnemy : MonoBehaviour
         //    man.BackDistance = 400;
 
         if (man.enemylive > 3)
-            man.BackDistance = 700;
+            man.BackDistance = BackDistance1;//5v5优化版本胜率挺高，其他版本为700
         else if (man.enemylive > 1 && man.enemylive <= 3)
-            man.BackDistance = BackDistance;
+            man.BackDistance =BackDistance2;
         else
-            man.BackDistance = BackDistance;
+            man.BackDistance =BackDistance2;
 
         if (!tankSpawner.useTA)
         {

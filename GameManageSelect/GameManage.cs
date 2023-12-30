@@ -57,8 +57,8 @@ public class GameManage : MonoBehaviour
     public int num_Red = 0;
 
     //对局双方总数
-    private int SUM_RED;
-    private int SUM_BLUE;
+    public int SUM_RED;
+    public int SUM_BLUE;
 
     //对局总数
     public int round = 1;
@@ -67,6 +67,7 @@ public class GameManage : MonoBehaviour
     public float eff;
 
     public bool isRecord;
+    private bool shouldCapture = false;
 
     //对局胜场统计
     public int Blue_win = 0;
@@ -186,6 +187,13 @@ public class GameManage : MonoBehaviour
     void Update()
     {
         Righttime -= Time.deltaTime;
+        if (round == RecordRounds + 1)
+        {
+            StartCoroutine(CaptureScreenshot());
+            UnityEngine.Debug.Log(" Rounds: " + (round - 1 <= 100 ? round - 1 : 100) + " Blue_win: " + Blue_win + " Red_win: " + Red_win + "  " + ((float)Red_win / (Red_win + Blue_win + Both_win)).ToString("f3") + "% " + "NUM_BIO: "
+                + TranningSetting.RedTeam.nums + " NUM_RL: " + TranningSetting.BlueTeam.nums + " eff: " + eff.ToString("f2"));
+            ResetScene();
+        }
     }
     void FixedUpdate()
     {
@@ -199,6 +207,7 @@ public class GameManage : MonoBehaviour
         left_Step -= 1;
         RedScore = 0;
         BlueScore = 0;
+
 
         //判断是否有一方胜利
         Whether_win();
@@ -275,6 +284,7 @@ public class GameManage : MonoBehaviour
 
     public void ResetScene()
     {
+        
         ++round;
         left_Step = MaxEnvironmentSteps;
         shell_all = GameObject.FindGameObjectsWithTag("Shell");
@@ -434,7 +444,8 @@ public class GameManage : MonoBehaviour
                 }
                 else if (UseRandomPos == 2)
                 {
-                    item.gameObject.SetActive(true);
+                    if (item.TankNum > TranningSetting.RedTeam.nums) item.gameObject.SetActive(false);
+                    else item.gameObject.SetActive(true);
                     item.transform.position = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[0];
                     item.transform.forward = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[1];
                 }
@@ -491,7 +502,8 @@ public class GameManage : MonoBehaviour
             {
                 foreach (var item in tankSpawner.TAList)
                 {
-                    item.gameObject.SetActive(true);
+                    if (item.TankNum + 1 > TranningSetting.BlueTeam.nums) item.gameObject.SetActive(false);
+                    else item.gameObject.SetActive(true);
                     item.transform.position = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[0];
                     item.transform.forward = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[1];
 
@@ -542,7 +554,7 @@ public class GameManage : MonoBehaviour
 
     public void setTimeScale(int redNum, int blueNum)
     {
-        if (redNum == 5 && blueNum == 5) Time.timeScale = 15;
+         if (redNum == 5 && blueNum == 5) Time.timeScale = 15;
         else Time.timeScale = 18;
     }
 
@@ -551,12 +563,10 @@ public class GameManage : MonoBehaviour
         ManControl man = FindObjectOfType<ManControl>();
         if (isRecord)
         {
-            if (round > RecordRounds)
+            if (round > RecordRounds + 1)
             {
-                UnityEngine.Debug.Log(" Rounds: " + (round - 1) + " Blue_win: " + Blue_win + " Red_win: " + Red_win + "  " + ((float)Red_win / (Red_win + Blue_win + Both_win)).ToString("f3") + "% " + "NUM_BIO: " 
-                    + TranningSetting.RedTeam.nums + " NUM_RL: " + TranningSetting.BlueTeam.nums + " eff: " + eff);
                 //对局重置时数据初始化
-                round = 1;
+                round = 0;
                 Blue_win = 0;
                 Red_win = 0;
                 Both_win = 0;
@@ -565,8 +575,6 @@ public class GameManage : MonoBehaviour
                 BIO_Dead_Num = 0;
                 BIO_Dead_Cacul_Num = 0;
 
-                SUM_RED = TranningSetting.RedTeam.nums;
-                SUM_BLUE = TranningSetting.BlueTeam.nums;
                 //Time.timeScale = 0;//新增，100回合暂停
                 if (TranningSetting.RedTeam.nums == 5)
                 {
@@ -604,16 +612,13 @@ public class GameManage : MonoBehaviour
                     }
 
                 }
-                foreach (var item in tankSpawner.Biolist)
-                {
-                    if(item.TankNum > TranningSetting.RedTeam.nums) item.gameObject.SetActive(false);
-                    else item.gameObject.SetActive(true);
-                }
-                foreach (var item in tankSpawner.TAList)
-                {
-                    if (item.TankNum + 1 > TranningSetting.BlueTeam.nums) item.gameObject.SetActive(false);
-                    else item.gameObject.SetActive(true);
-                }
+
+                SUM_RED = TranningSetting.RedTeam.nums;
+                SUM_BLUE = TranningSetting.BlueTeam.nums;
+                UpdateTitle(SUM_RED, SUM_BLUE);
+                ResetScene();
+                setTimeScale(SUM_RED, SUM_BLUE);
+
 
                 man.cannon_script2.setRadius(TranningSetting.RedTeam.nums, TranningSetting.BlueTeam.nums, tankSpawner.useTA, TranningSetting.algorithmSelect.BioOptimized);
                 man.findEnemy2.setDis(TranningSetting.RedTeam.nums, TranningSetting.BlueTeam.nums, tankSpawner.useTA, TranningSetting.algorithmSelect.BioOptimized);
@@ -649,6 +654,32 @@ public class GameManage : MonoBehaviour
 
 
         return result;
+    }
+
+    private IEnumerator CaptureScreenshot()
+    {
+        // Time.timeScale = 0.1f;
+        // 等待渲染帧结束
+        yield return new WaitForEndOfFrame();
+
+
+        // 创建截图文件路径
+        string folderPath = @"D:\ObjectFiles\Master\文档材料\testCut\";
+        if (!Directory.Exists(folderPath))
+            Directory.CreateDirectory(folderPath);
+
+        string fileName = "Screenshot_" + System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".png";
+        string fullPath = folderPath + fileName;
+
+        // 截图并保存
+        ScreenCapture.CaptureScreenshot(fullPath);
+
+        // 可选：输出截图保存的位置
+        UnityEngine.Debug.Log("Screenshot saved to: " + fullPath);
+        
+        yield return new WaitForSeconds(1.0f);
+        //Time.timeScale = 0.1f;
+        
     }
 
     //随机生成位置,该函数用于保证生成tank相距一定距离
@@ -724,171 +755,7 @@ public class GameManage : MonoBehaviour
         }
     }
 
-    //固定生成位置
-    public void fixedPosition(TankControl SetTank, bool ischangeposition, int Bluecount = -1, int Redcount = -1)
-    {
-        if (is_City)
-        {
-            Vector3 currentPositionBlue = BornPointBlue[0];
-            Vector3 currentPositionRed = BornPointRed[0];
-            //
-            if (SetTank.GetComponent<TankControl>().tankTeam == TankTeam.Tank_Blue)
-            {
-                SetTank.transform.position = new Vector3(currentPositionBlue.x - 2 * Bluecount, currentPositionBlue.y, currentPositionBlue.z + 10 * Bluecount);
-            }
-            else
-            {
-                SetTank.transform.position = new Vector3(currentPositionRed.x - Redcount, currentPositionRed.y, currentPositionRed.z + 10 * Redcount);
-            }
-        }
-        else
-        {
-
-            Vector3 currentPositionBlue = BornPointBlue[0];
-            Vector3 currentPositionRed = BornPointRed[0];
-            Vector3 currentPositionBlue1 = BornPointBlue[1];
-            Vector3 currentPositionBlue2 = BornPointBlue[2];
-            Vector3 currentPositionBlue3 = BornPointBlue[3];
-
-            if (ischangeposition)
-            {
-                switch (round % 4 - 1)
-                {
-                    case 0:
-                        switch (SetTank.TankNum % 5)
-                        {
-                            case 0:
-                                SetTank.transform.position = new Vector3(currentPositionBlue.x, currentPositionBlue.y, currentPositionBlue.z + 50 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(-1, 0, 1);
-                                break;
-                            case 1:
-                                SetTank.transform.position = new Vector3(currentPositionBlue.x + 60, currentPositionBlue.y, currentPositionBlue.z + 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(-1, 0, 1);
-                                break;
-                            case 2:
-                                SetTank.transform.position = new Vector3(currentPositionBlue.x + 120, currentPositionBlue.y, currentPositionBlue.z + 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(-1, 0, 1);
-                                break;
-                            case 3:
-                                SetTank.transform.position = new Vector3(currentPositionBlue.x + 180, currentPositionBlue.y, currentPositionBlue.z + 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(-1, 0, 1);
-                                break;
-                            case 4:
-                                SetTank.transform.position = new Vector3(currentPositionBlue.x + 240, currentPositionBlue.y, currentPositionBlue.z + 20 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(-1, 0, 1);
-                                break;
-                        }
-                        break;
-                    case 1:
-                        switch (SetTank.TankNum % 5)
-                        {
-                            case 0:
-                                SetTank.transform.position = new Vector3(currentPositionBlue1.x, currentPositionBlue1.y, currentPositionBlue1.z + 50 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(1, 0, 1);
-                                break;
-                            case 1:
-                                SetTank.transform.position = new Vector3(currentPositionBlue1.x - 60, currentPositionBlue1.y, currentPositionBlue1.z + 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(1, 0, 1);
-                                break;
-                            case 2:
-                                SetTank.transform.position = new Vector3(currentPositionBlue1.x - 120, currentPositionBlue1.y, currentPositionBlue1.z + 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(1, 0, 1);
-                                break;
-                            case 3:
-                                SetTank.transform.position = new Vector3(currentPositionBlue1.x - 180, currentPositionBlue1.y, currentPositionBlue1.z + 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(1, 0, 1);
-                                break;
-                            case 4:
-                                SetTank.transform.position = new Vector3(currentPositionBlue1.x - 240, currentPositionBlue1.y, currentPositionBlue1.z + 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(1, 0, 1);
-                                break;
-                        }
-                        break;
-                    case 2:
-                        switch (SetTank.TankNum % 5)
-                        {
-                            case 0:
-                                SetTank.transform.position = new Vector3(currentPositionBlue2.x, currentPositionBlue2.y, currentPositionBlue2.z - 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(1, 0, -1);
-                                break;
-                            case 1:
-                                SetTank.transform.position = new Vector3(currentPositionBlue2.x - 60, currentPositionBlue2.y, currentPositionBlue2.z - 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(1, 0, -1);
-                                break;
-                            case 2:
-                                SetTank.transform.position = new Vector3(currentPositionBlue2.x - 120, currentPositionBlue2.y, currentPositionBlue2.z - 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(1, 0, -1);
-                                break;
-                            case 3:
-                                SetTank.transform.position = new Vector3(currentPositionBlue2.x - 180, currentPositionBlue2.y, currentPositionBlue2.z - 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(1, 0, -1);
-                                break;
-                            case 4:
-                                SetTank.transform.position = new Vector3(currentPositionBlue2.x - 240, currentPositionBlue2.y, currentPositionBlue2.z - 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(1, 0, -1);
-                                break;
-                        }
-                        break;
-                    case -1:
-                        switch (SetTank.TankNum % 5)
-                        {
-                            case 0:
-                                SetTank.transform.position = new Vector3(currentPositionBlue3.x, currentPositionBlue3.y, currentPositionBlue3.z - 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(-1, 0, -1);
-                                break;
-                            case 1:
-                                SetTank.transform.position = new Vector3(currentPositionBlue3.x + 60, currentPositionBlue3.y, currentPositionBlue3.z - 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(-1, 0, -1);
-                                break;
-                            case 2:
-                                SetTank.transform.position = new Vector3(currentPositionBlue3.x + 120, currentPositionBlue.y, currentPositionBlue3.z - 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(-1, 0, -1);
-                                break;
-                            case 3:
-                                SetTank.transform.position = new Vector3(currentPositionBlue3.x + 180, currentPositionBlue3.y, currentPositionBlue3.z - 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(-1, 0, -1);
-                                break;
-                            case 4:
-                                SetTank.transform.position = new Vector3(currentPositionBlue3.x + 240, currentPositionBlue3.y, currentPositionBlue3.z - 30 * (SetTank.TankNum % 5 - 1));
-                                SetTank.transform.forward = new Vector3(-1, 0, -1);
-                                break;
-                        }
-                        break;
-                }
-
-            }
-            else
-            {
-                switch (SetTank.TankNum % 5)
-                {
-                    case 0:
-                        SetTank.transform.position = new Vector3(currentPositionBlue.x, currentPositionBlue.y, currentPositionBlue.z + 20 * (SetTank.TankNum % 5 - 1));
-                        SetTank.transform.forward = new Vector3(-1, 0, 1);
-                        break;
-                    case 1:
-                        SetTank.transform.position = new Vector3(currentPositionBlue.x + 20, currentPositionBlue.y, currentPositionBlue.z + 20 * (SetTank.TankNum % 5 - 1));
-                        SetTank.transform.forward = new Vector3(-1, 0, 1);
-                        break;
-                    case 2:
-                        SetTank.transform.position = new Vector3(currentPositionBlue.x + 40, currentPositionBlue.y, currentPositionBlue.z + 20 * (SetTank.TankNum % 5 - 1));
-                        SetTank.transform.forward = new Vector3(-1, 0, 1);
-                        break;
-                    case 3:
-                        SetTank.transform.position = new Vector3(currentPositionBlue.x + 60, currentPositionBlue.y, currentPositionBlue.z + 20 * (SetTank.TankNum % 5 - 1));
-                        SetTank.transform.forward = new Vector3(-1, 0, 1);
-                        break;
-                    case 4:
-                        SetTank.transform.position = new Vector3(currentPositionBlue.x + 80, currentPositionBlue.y, currentPositionBlue.z + 20 * (SetTank.TankNum % 5 - 1));
-                        SetTank.transform.forward = new Vector3(-1, 0, 1);
-                        break;
-                }
-            }
-
-
-        }
-
-    }
-
+  
 
 
     //}
@@ -1200,7 +1067,7 @@ public class GameManage : MonoBehaviour
 
 
         ManControl man = FindAnyObjectByType<ManControl>();
-        TextList[1].text = "场次: " + (round - 1).ToString() + " / 100 ";// + ((float)Red_win / (Red_win + Blue_win)).ToString("f3");// + " - " +
+        TextList[1].text = "场次: " + (round - 1 <= 100 ? round - 1 : 100).ToString() + " / 100 ";// + ((float)Red_win / (Red_win + Blue_win)).ToString("f3");// + " - " +
 
         TextList[2].text = "红方当前存活: " + num_Red.ToString();
         TextList[3].text = "蓝方当前存活: " + num_Blue.ToString();
