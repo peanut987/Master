@@ -444,8 +444,16 @@ public class GameManage : MonoBehaviour
                 }
                 else if (UseRandomPos == 2)
                 {
-                    if (item.TankNum > TranningSetting.RedTeam.nums) item.gameObject.SetActive(false);
-                    else item.gameObject.SetActive(true);
+                    if (item.TankNum > TranningSetting.RedTeam.nums)
+                    {
+                        item.Isdead = true;
+                        item.gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        item.Isdead = false;
+                        item.gameObject.SetActive(true);
+                    }
                     item.transform.position = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[0];
                     item.transform.forward = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[1];
                 }
@@ -476,7 +484,7 @@ public class GameManage : MonoBehaviour
                 item.MinNum = -1;
                 item.HillIndex = -1;
                 item.isNavigate = true;
-                item.Isdead = false;
+                //item.Isdead = false;
                 item.stopTime = 0;
                 item.rotateFlag = -1;
                 item.firetime = 300;
@@ -502,8 +510,16 @@ public class GameManage : MonoBehaviour
             {
                 foreach (var item in tankSpawner.TAList)
                 {
-                    if (item.TankNum + 1 > TranningSetting.BlueTeam.nums) item.gameObject.SetActive(false);
-                    else item.gameObject.SetActive(true);
+                    if (item.TankNum + 1 > TranningSetting.BlueTeam.nums)
+                    {
+                        item.Isdead = true;
+                        item.gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        item.Isdead = false;
+                        item.gameObject.SetActive(true);
+                    }
                     item.transform.position = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[0];
                     item.transform.forward = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[1];
 
@@ -533,7 +549,7 @@ public class GameManage : MonoBehaviour
                     item.MinNum = -1;
                     item.HillIndex = -1;
                     item.isNavigate = true;
-                    item.Isdead = false;
+                    //item.Isdead = false;
                     item.fire = 0;
                     item.assignFlag = false;
                     if (TranningSetting.RedTeam.HumanControl)
@@ -555,7 +571,7 @@ public class GameManage : MonoBehaviour
     public void setTimeScale(int redNum, int blueNum)
     {
         if (redNum == 5 && blueNum == 5) Time.timeScale = 15;
-        else Time.timeScale = 20;
+        else Time.timeScale = 18;
     }
 
     public void RecordMode()
@@ -664,7 +680,7 @@ public class GameManage : MonoBehaviour
 
 
         // 创建截图文件路径
-        string folderPath = @"D:\ObjectFiles\Master\文档材料\testCut\";
+        string folderPath = @"D:\ObjectFiles\Master\文档材料\testCut12.30\";
         if (!Directory.Exists(folderPath))
             Directory.CreateDirectory(folderPath);
 
