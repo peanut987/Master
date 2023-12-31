@@ -55,11 +55,15 @@ public class ObstacleAvoid : MonoBehaviour
             {
                 if (isOptimized)
                 {
-                    roundTime = new float[] { 15, 20, 25, 25 };
-                    angle = new float[] { -60, 60, 60, -60 };
-                    //dis = new float[] { 800, 100, 300 };
-                    dis = new float[] { 1000, 200, 300 };
-                    speed = new float[] { 0.2f, 0.2f };
+                    //roundTime = new float[] { 15, 20, 25, 25 };
+                    //angle = new float[] { -60, 60, 60, -60 };
+                    ////dis = new float[] { 800, 100, 300 };
+                    //dis = new float[] { 1000, 200, 300 };
+                    //speed = new float[] { 0.2f, 0.2f };
+                    roundTime = new float[] { 25, 15, 15, 15 };
+                    angle = new float[] { -45, 45, 60, -60 };
+                    dis = new float[] { 800, 100, 200 };
+                    speed = new float[] { 0.1f, 0.1f };
                 }
                 else
                 {
