@@ -29,6 +29,7 @@ public class InfoCalculate : MonoBehaviour
 		man.enemylive = 0;
 		man.teammatelive = 0;
 		man.Enemy_len = tankSpawner.useTA ? man.BioEnemydirTA.Count : man.BioEnemydir.Count;
+		man.pos = man.findEnemy2.judgeSelfPosToCenter(man);
 		for (int i = 0; i < EnemyNum; i++)
 		{
 			if (!tankSpawner.useTA)

@@ -67,7 +67,7 @@ public class FindEnemy : MonoBehaviour
             {
                 if (isOptimized)
                 {
-                   BackDistance2 = 800;
+                   BackDistance2 = 500;
                     AmbushDis = 0;
                 }
                 else
@@ -134,7 +134,16 @@ public class FindEnemy : MonoBehaviour
     
     public void Scout(ManControl man, Transform transform)
     {
-        float t = 0.01f;
+        man.AmbushDis = AmbushDis;
+        if (man.trainingSetting.RedTeam.nums == 3 && man.trainingSetting.BlueTeam.nums == 4)
+        {
+            if (!man.trainingSetting.algorithmSelect.BioOptimized)
+            {
+                if (judgeSelfPosToCenter(man) == 0 || judgeSelfPosToCenter(man) == -1) man.AmbushDis = 50;
+                //else man.AmbushDis = AmbushDis;
+            }
+        }
+       float t = 0.01f;
         Vector3 target;
         man.OpenFireDis = 2000.0f;//设置开火范围
 

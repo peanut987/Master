@@ -57,6 +57,7 @@ public class ManControl : MonoBehaviour
 	public float setAvoidDis = 20.0f;
 	public float avoidAngle = 0;
 	public float BackDistance;//后撤距离
+	public float AmbushDis;
 	public float OpenFireDis;//可开火距离
 	public float TeammateAvoidDis = 5.0f;//队友避障距离阈值
 	public float EnemyAvoidDis = 5.0f;//对手避障距离阈值

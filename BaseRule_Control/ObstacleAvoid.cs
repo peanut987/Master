@@ -56,9 +56,9 @@ public class ObstacleAvoid : MonoBehaviour
                 if (isOptimized)
                 {
                     roundTime = new float[] { 15, 20, 25, 25 };
-                    angle = new float[] { -60, 60, 70, -70 };
-                   // dis = new float[] { 800, 100, 300 };
-                    dis = new float[] { 1000, 200, 200 };
+                    angle = new float[] { -60, 60, 60, -60 };
+                    //dis = new float[] { 800, 100, 300 };
+                    dis = new float[] { 1000, 200, 300 };
                     speed = new float[] { 0.2f, 0.2f };
                 }
                 else
@@ -158,34 +158,12 @@ public class ObstacleAvoid : MonoBehaviour
 
         
 
-        if ((GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[0] && man.gameManage.round % 4 == 0)
-            ||(GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[1] && man.gameManage.round % 4 == 1)
-            || (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[2] && man.gameManage.round % 4 == 2)
-            || (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[3] && man.gameManage.round % 4 == 3))
-        {
-            switch (man.findEnemy2.judgeSelfPosToCenter(man))
-            {
-                case 1:
-                    target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, angle[0], 30, 0);
-                    break;
-                case 2:
-                    target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, angle[1], 30, 0);
-                    break;
-                default:
-                    target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 0, 30, 0);
-                    man.relativespeed = speed[0];
-                    break;
-            }
-        }
-        else
-            man.relativespeed = 1.0f;
-
         if(trainingSetting.RedTeam.nums == 3 && trainingSetting.BlueTeam.nums == 5)
         {
             if ((GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[1] && man.gameManage.round % 4 == 1)
             || (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[2] && man.gameManage.round % 4 == 2))
             {
-                man.pos = man.findEnemy2.judgeSelfPosToCenter(man);
+                
                 switch (man.findEnemy2.judgeSelfPosToCenter(man))
                 {
                     case 1:
@@ -208,7 +186,7 @@ public class ObstacleAvoid : MonoBehaviour
                 switch (man.findEnemy2.judgeSelfPosToCenter(man))
                 {
                     case 1:
-                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, -angle[0], 30, 0);
+                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, angle[0], 30, 0);
                         man.relativespeed = 1.0f;
                         break;
                     case 2:
@@ -224,6 +202,30 @@ public class ObstacleAvoid : MonoBehaviour
             else
                 man.relativespeed = 1.0f;
 
+        }
+        else
+        {
+            if ((GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[0] && man.gameManage.round % 4 == 0)
+    || (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[1] && man.gameManage.round % 4 == 1)
+    || (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[2] && man.gameManage.round % 4 == 2)
+    || (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= roundTime[3] && man.gameManage.round % 4 == 3))
+            {
+                switch (man.findEnemy2.judgeSelfPosToCenter(man))
+                {
+                    case 1:
+                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, angle[0], 30, 0);
+                        break;
+                    case 2:
+                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, angle[1], 30, 0);
+                        break;
+                    default:
+                        target = man.baseFunction2.Set_point(man.transform, target - man.transform.position, 0, 30, 0);
+                        man.relativespeed = speed[0];
+                        break;
+                }
+            }
+            else
+                man.relativespeed = 1.0f;
         }
 
         if ((target == (!tankSpawner.useTA ? tankSpawner.BlueAgentsList[man.MinNum - 1].transform.position : tankSpawner.TAList[man.MinNum - 1].transform.position)) && isEnmey)
