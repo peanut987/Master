@@ -77,7 +77,7 @@ public class ObstacleAvoid : MonoBehaviour
             {
                 if (isOptimized)
                 {
-                    roundTime = new float[] { 25, 15, 15, 15 };
+                    roundTime = new float[] { 25, 15, 15, 20 };
                     angle = new float[] { -60, 60, 70, -70 };
                     dis = new float[] { 800, 100, 200 };
                     speed = new float[] { 0.1f, 0.2f };
@@ -112,7 +112,8 @@ public class ObstacleAvoid : MonoBehaviour
                 {
                     roundTime = new float[] { 15, 20, 15, 15 }; ;
                     angle = new float[] { -60, 60, 70, -70 };
-                    dis = new float[] { 800, 100, 150 };
+                    //dis = new float[] { 800, 100, 150 };
+                    dis = new float[] { 1000, 200, 200 };
                     speed = new float[] { 0.1f, 0.2f };
                 }
                 else

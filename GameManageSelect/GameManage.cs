@@ -680,7 +680,7 @@ public class GameManage : MonoBehaviour
 
 
         // 创建截图文件路径
-        string folderPath = @"D:\ObjectFiles\Master\文档材料\testCut12.30\";
+        string folderPath = @"D:\ObjectFiles\Master\文档材料\testCut1.1\";
         if (!Directory.Exists(folderPath))
             Directory.CreateDirectory(folderPath);
 

@@ -18,7 +18,7 @@ public class Cannon : MonoBehaviour
 	public bool ColliderFlag = false;
 	public bool ColliderFlag1 = false;
 	private float castDis = 2000.0f;
-	private float sphereRadius = 0.8f; // 设置球体的半径
+	public float sphereRadius = 0.8f; // 设置球体的半径
 	void Start()
 	{
 		tankTransform = transform.parent.parent.parent;
@@ -165,7 +165,7 @@ public class Cannon : MonoBehaviour
 				}
 				else
 				{
-					sphereRadius = 0.7f;
+					sphereRadius = 1.3f;
 				}
 			}
 			else if (redNum == 4 && blueNum == 3)
@@ -187,9 +187,10 @@ public class Cannon : MonoBehaviour
 				}
 				else
 				{
-					sphereRadius = 1.0f;
+					sphereRadius = 1.3f;
 				}
 			}
 		}
+		//print(sphereRadius);
 	}
 }

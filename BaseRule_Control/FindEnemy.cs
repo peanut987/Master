@@ -74,20 +74,23 @@ public class FindEnemy : MonoBehaviour
                 }
                 else
                 {
-                   BackDistance2 = 600;
-                    AmbushDis = 500;
+                    BackDistance1 = 500;
+                    BackDistance2 = 500;
+                    AmbushDis = 400;
                 }
             }
             else if (redNum == 3 && blueNum == 5)
             {
                 if (isOptimized)
                 {
-                   BackDistance2 = 500;
+                    BackDistance1 = 500;
+                    BackDistance2 = 500;
                     AmbushDis = 100;
                 }
                 else
                 {
-                   BackDistance2 = 500;
+                    BackDistance1 = 500;
+                    BackDistance2 = 500;
                     AmbushDis = 300;
                 }
             }
