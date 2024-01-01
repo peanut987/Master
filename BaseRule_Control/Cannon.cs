@@ -157,7 +157,18 @@ public class Cannon : MonoBehaviour
 	{
 		if (isNR)
 		{
-			if ((redNum == 3 && blueNum == 3) || (redNum == 3 && blueNum == 4) || (redNum == 3 && blueNum == 5))
+			if((redNum == 3 && blueNum == 3))
+            {
+				if (isOptimized)
+				{
+					sphereRadius = 0.7f;
+				}
+				else
+				{
+					sphereRadius = 0.7f;
+				}
+			}
+			else if ( (redNum == 3 && blueNum == 4) || (redNum == 3 && blueNum == 5))
 			{
 				if (isOptimized)
 				{

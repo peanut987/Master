@@ -60,7 +60,7 @@ public class FindEnemy : MonoBehaviour
                 else
                 {
                    BackDistance2 = 500;
-                    AmbushDis = 300;
+                    AmbushDis = 250;
                 }
             }
             else if (redNum == 3 && blueNum == 4)
