@@ -158,9 +158,9 @@ public class FindEnemy : MonoBehaviour
         if (man.enemylive > 3)
             man.BackDistance = BackDistance1;//5v5优化版本胜率挺高，其他版本为700
         else if (man.enemylive > 1 && man.enemylive <= 3)
-            man.BackDistance =BackDistance2;
+            man.BackDistance = BackDistance2;
         else
-            man.BackDistance =BackDistance2;
+            man.BackDistance = BackDistance2;
 
         if (!tankSpawner.useTA)
         {
