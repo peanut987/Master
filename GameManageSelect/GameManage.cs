@@ -77,6 +77,7 @@ public class GameManage : MonoBehaviour
 
     public GameObject initialPos;
 
+    public float PH = 0;
     private float PH_Red = 0;
     private float PH_Blue = 0;
     private float RedScore = 0;
@@ -179,7 +180,7 @@ public class GameManage : MonoBehaviour
         UpdateTitle(SUM_RED, SUM_BLUE);
         //UnityEngine.Debug.Log("game tankSpawner.Biolist" + tankSpawner.Biolist.Count);
         //InitMapData();
-        setTimeScale(SUM_RED, SUM_BLUE);
+        //setTimeScale(SUM_RED, SUM_BLUE);
         ResetScene();
 
     }
@@ -633,7 +634,7 @@ public class GameManage : MonoBehaviour
                 SUM_BLUE = TranningSetting.BlueTeam.nums;
                 UpdateTitle(SUM_RED, SUM_BLUE);
                 ResetScene();
-                setTimeScale(SUM_RED, SUM_BLUE);
+                //setTimeScale(SUM_RED, SUM_BLUE);
 
 
                 man.cannon_script2.setRadius(TranningSetting.RedTeam.nums, TranningSetting.BlueTeam.nums, tankSpawner.useTA, TranningSetting.algorithmSelect.BioOptimized);
@@ -680,7 +681,7 @@ public class GameManage : MonoBehaviour
 
 
         // 创建截图文件路径
-        string folderPath = @"D:\ObjectFiles\Master\文档材料\testCut1.1\";
+        string folderPath = @"D:\ObjectFiles\Master\文档材料\1.11word\";
         if (!Directory.Exists(folderPath))
             Directory.CreateDirectory(folderPath);
 
@@ -1091,8 +1092,20 @@ public class GameManage : MonoBehaviour
 
         TextList[4].text = "红方胜率: " + ((float)Red_win / (Red_win + Blue_win + Both_win)).ToString("f3");
 
+
+        
+        if ((TranningSetting.RedTeam.nums == 4 && TranningSetting.BlueTeam.nums == 3) || (TranningSetting.RedTeam.nums == 3 && TranningSetting.BlueTeam.nums == 5))
+        {
+            PH = TranningSetting.RedTeam.FULLPH * 2;
+        }
+        else if ((TranningSetting.RedTeam.nums == 3 && TranningSetting.BlueTeam.nums == 4))
+        {
+            PH = TranningSetting.RedTeam.FULLPH * 3;
+        }
+        else
+            PH = TranningSetting.RedTeam.FULLPH;
         float a1 = (float)BIO_Dead_Cacul_Num / (Red_win * TranningSetting.RedTeam.nums);
-        float a2 = (float)BIO_PH_Cacul_Loss / (Red_win * TranningSetting.RedTeam.nums * man.PHFULL);
+        float a2 = (float)BIO_PH_Cacul_Loss / (Red_win * TranningSetting.RedTeam.nums * PH);
 
         eff = (1 / (a1 + 0.1f)) * 0.5f +(1 / (a2 + 0.1f)) * 0.5f;
         if (!TranningSetting.RedTeam.HumanControl && !TranningSetting.BlueTeam.HumanControl)

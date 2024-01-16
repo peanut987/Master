@@ -59,8 +59,11 @@ public class FindEnemy : MonoBehaviour
                 }
                 else
                 {
-                   BackDistance2 = 500;
-                    AmbushDis = 250;
+                    //BackDistance2 = 500;
+                    // AmbushDis = 250;
+                    BackDistance1 = 0;
+                    BackDistance2 = 0;
+                    AmbushDis = 50.0F;
                 }
             }
             else if (redNum == 3 && blueNum == 4)
@@ -91,7 +94,7 @@ public class FindEnemy : MonoBehaviour
                 {
                     BackDistance1 = 500;
                     BackDistance2 = 500;
-                    AmbushDis = 300;
+                    AmbushDis = 400;
                 }
             }
             else if (redNum == 4 && blueNum == 3)
@@ -124,14 +127,17 @@ public class FindEnemy : MonoBehaviour
             {
                 if (isOptimized)
                 {
+                    //BackDistance1 = 800;
+                    //BackDistance2 = 600;
                     BackDistance1 = 800;
                     BackDistance2 = 600;
                     AmbushDis = 0;
                 }
                 else
                 {
-                   BackDistance2 = 700;
+                    BackDistance2 = 700;
                     AmbushDis = 450;
+
                 }
             }
         }
@@ -347,6 +353,7 @@ public class FindEnemy : MonoBehaviour
         TATank.Enemy_len = TATank.TAEnemydir.Count;
         TATank.MinNum = TATank.Enemy_len != 0 ? TATank.enemyJudge2.enemyList[TATank.TankNum] : 1;
         TATank.relativespeed = 1;
+        //TATank.NUM_Text.text = (TATank.TankNum + 1).ToString() + "-" + (TATank.MinNum).ToString();
 
         //计算对手的方位
         var attackedEnemy = tankSpawner.Biolist[TATank.MinNum - 1].GetComponent<ManControl>();
@@ -358,9 +365,9 @@ public class FindEnemy : MonoBehaviour
 
         TATank.target1 = tankSpawner.Biolist[TATank.MinNum - 1].transform.position;
         if (TATank.baseFunction2.CalculateDisX0Z(TATank.target1, TATank.transform.position) > 30)
-            TATank.offset = ((TATank.target1 - TATank.transform.position).normalized + obstacleAvoid2.ObstacleVector(TATank, 45, 30).normalized).normalized;//obstacleAvoid2.CacPosition(TATank, transform, TATank.target1, 180);//通过避障函数求出运行方向
+            TATank.offset = ((TATank.target1 - TATank.transform.position).normalized + obstacleAvoid2.ObstacleVector(TATank, 45, 30).normalized + NRTeamMateAvoid(TATank, trainingSetting.BlueTeam.nums, 50)).normalized;//obstacleAvoid2.CacPosition(TATank, transform, TATank.target1, 180);//通过避障函数求出运行方向
         else
-            TATank.offset = ((TATank.transform.position - TATank.target1).normalized + obstacleAvoid2.ObstacleVector(TATank, 45, 30).normalized).normalized;//obstacleAvoid2.CacPosition(TATank, transform, TATank.target1, 180);//通过避障函数求出运行方向
+            TATank.offset = ((TATank.transform.position - TATank.target1).normalized + obstacleAvoid2.ObstacleVector(TATank, 45, 30).normalized + NRTeamMateAvoid(TATank, trainingSetting.BlueTeam.nums, 50)).normalized;//obstacleAvoid2.CacPosition(TATank, transform, TATank.target1, 180);//通过避障函数求出运行方向
 
         TATank.offset[1] = 0;//令y方向为0
 
@@ -388,23 +395,31 @@ public class FindEnemy : MonoBehaviour
             TATank.OpenFire3(1, TATank.enemyAngle1, 1);
         }
     }
-    //public int judgeSelfPos(ManControl man)
-    //{
-    //    int result = -1;   
-    //    if(man.BioSameEnemyDir.Count !=0)
-    //    {
-    //        if (man.EnemyDis[man.MinNum - 1] > man.BioSameEnemyDir.First().Key)
-    //        {
-    //            if (man.TeamMateSingleRot[man.BioSameEnemyDir.First().Value.TankNum - 1] > 0)
-    //                result = 1;
-    //            else
-    //                result = 2;
-    //        }
-    //    }
 
-    //    return result;
+    private Vector3 NRTeamMateAvoid(ManControl man, int teamnum, float avoidDis)
+    {
+        Vector3 TeamMateDir = Vector3.zero ,AllTeamMateDir = Vector3.zero;
+        for (int i = 0; i < teamnum; i++)
+        {
+            float TeamMateDis = i == man.TankNum ? 10000.0f : man.baseFunction2.CalculateDisX0Z(man.transform.position, tankSpawner.TAList[i].transform.position);//man.TeamMateDis1[i];
+            float position_y = Mathf.Abs(man.transform.position.y - tankSpawner.TAList[i].transform.position.y);
+            //if (man.TankNum == 7) print(TeamMateDis);
+            if ((TeamMateDis < avoidDis) && TeamMateDis != 10000.0f && position_y < 4)
+            {
+                //print("avoid");
+                TeamMateDir = (man.transform.position - tankSpawner.TAList[i].transform.position).normalized;
+            }
+            else
+            {
 
-    //}
+                TeamMateDir = Vector3.zero;
+            }
+            AllTeamMateDir += TeamMateDir;
+        }
+        //if (AllTeamMateDir != Vector3.zero) UnityEngine.Debug.Log(AllTeamMateDir);
+        return AllTeamMateDir;
+    }
+
     public int judgeSelfPos(ManControl man)
     {
         int result = -1;

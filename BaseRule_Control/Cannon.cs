@@ -35,8 +35,8 @@ public class Cannon : MonoBehaviour
 		}
 		else
 		{
-			cannon_line.startWidth = 0.5f;
-			cannon_line.endWidth = 0.5f;
+			cannon_line.startWidth = 4.5f;
+			cannon_line.endWidth = 4.5f;
 			castDis = 1250.0f;
 		}
 		setRadius(manControl.trainingSetting.RedTeam.nums, manControl.trainingSetting.BlueTeam.nums, tankSpawner.useTA, manControl.trainingSetting.algorithmSelect.BioOptimized);
@@ -46,7 +46,10 @@ public class Cannon : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		Cannon_Ray_Cast(shellPos.position, shellPos.position + transform.forward.normalized * castDis);
+		Vector3 toward = (tankSpawner.TAList[manControl.MinNum - 1].transform.position - manControl.transform.position).normalized;
+		castDis = Vector3.Distance(tankSpawner.TAList[manControl.MinNum - 1].transform.position, manControl.transform.position);
+		Cannon_Ray_Cast(shellPos.position, shellPos.position + toward * castDis);
+		//Cannon_Ray_Cast(shellPos.position, shellPos.position + transform.forward.normalized * castDis);
 	}
 
 	public void Cannon_Ray_Cast(Vector3 Satrt, Vector3 End)
@@ -65,7 +68,8 @@ public class Cannon : MonoBehaviour
 
 		// ∑¢…‰…‰œﬂ
 		Ray ray = new Ray(start, direction);
-		int Rmask = LayerMask.GetMask("Tank") | LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("wall");
+		int Rmask = LayerMask.GetMask("Tank");// | LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("wall");
+		//int Rmask = LayerMask.GetMask("Tank") | LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("wall");
 		RaycastHit hit;
 
 		if (Physics.SphereCast(ray, sphereRadius ,out hit, castDis) && ((hit.collider.tag == "Tank_Blue" && manControl.tankTeam == TankTeam.Tank_Red)) && !manControl.Isdead)
@@ -145,10 +149,10 @@ public class Cannon : MonoBehaviour
 			{
 				cannon_line.SetPosition(0, start);
 				cannon_line.SetPosition(1, End);
-				cannon_line.enabled = false;
+				cannon_line.enabled = true;
 			} 
 			else
-				cannon_line.enabled = false;
+				cannon_line.enabled = true;
 
 		}
 	}
@@ -165,7 +169,7 @@ public class Cannon : MonoBehaviour
 				}
 				else
 				{
-					sphereRadius = 0.7f;
+					sphereRadius = 0.01f;
 				}
 			}
 			else if ( (redNum == 3 && blueNum == 4) || (redNum == 3 && blueNum == 5))
@@ -198,7 +202,7 @@ public class Cannon : MonoBehaviour
 				}
 				else
 				{
-					sphereRadius = 1.3f;
+					sphereRadius = 0.1f;
 				}
 			}
 		}

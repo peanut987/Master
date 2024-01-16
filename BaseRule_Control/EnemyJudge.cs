@@ -93,17 +93,17 @@ public class EnemyJudge : MonoBehaviour
 				float dis0 = man.MinNumBuffer[0] != -1 ? Vector3.Distance(man.transform.position, item0.transform.position) : 0.0f;
 				float dis1 = man.MinNumBuffer[1] != -1 ? Vector3.Distance(man.transform.position, item1.transform.position) : 0.0f;
 
-				if (Mathf.Abs(dis0 - dis1) < 20 && dis0 > 200 && !item1.Isdead)
-				{
-					man.MinNum = man.MinNumBuffer[1];
-					man.MinNumBuffer[0] = man.MinNumBuffer[1];
-				}
-				else
-				{
-					man.SameFireCount = 0;
-					man.left_edge = -1;
-					man.right_edge = 1;
-				}
+				//if (Mathf.Abs(dis0 - dis1) < 20 && dis0 > 200 && !item1.Isdead)
+				//{
+				//	man.MinNum = man.MinNumBuffer[1];
+				//	man.MinNumBuffer[0] = man.MinNumBuffer[1];
+				//}
+				//else
+				//{
+				//	man.SameFireCount = 0;
+				//	man.left_edge = -1;
+				//	man.right_edge = 1;
+				//}
 			}
 		}
 
@@ -282,7 +282,7 @@ public class EnemyJudge : MonoBehaviour
 				break;
 			}
 		}
-		if (enemyCount < 1)
+		if (enemyCount < 2)
 		{
 			return man.ResultMinNum;
 		}

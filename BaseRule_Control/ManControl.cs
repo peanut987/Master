@@ -210,6 +210,8 @@ public class ManControl : MonoBehaviour
 		MinNumBuffer = new int[] { -1, -1 };
 		//UnityEngine.Debug.Log("tankSpawner.Biolist" + tankSpawner.Biolist.Count);
 		StartCoroutine(Coroutine());
+		if (TankNum == 1 || TankNum == 2 || TankNum == 3) MinNum = 3;
+		if (TankNum == 4 || TankNum == 5) MinNum = 2;
 
 	}
 	IEnumerator Coroutine()
@@ -236,7 +238,7 @@ public class ManControl : MonoBehaviour
 				if (!trainingSetting.RedTeam.HumanControl && (MinNum == -1 || switchtime > switchlimit))
 				{
 					switchtime = 0;
-					enemyJudge2.Judge(this);
+					//enemyJudge2.Judge(this);
 				}
 				if (trainingSetting.RedTeam.HumanControl)
 				{

@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class CircleHighlight : MonoBehaviour
 {
+    public bool isTrajectory = false;
     private TranningSetting tranningSetting;
     public Transform targetObject; // 引用需要强调的个体
     public LineRenderer lineRenderer; // 引用LineRenderer组件
@@ -14,6 +15,11 @@ public class CircleHighlight : MonoBehaviour
     public Material material_red;
     public Material material_blue;
     public Material material_dead;
+
+    private int maxPoints = 500; // 轨迹上的最大点数
+    private float pointSpacing = 0.5f; // 新增：点之间的间隔
+    private float timer; // 新增：计时器
+    private Vector3[] positions;
     private void Start()
     {
         targetObject = transform;
@@ -25,56 +31,78 @@ public class CircleHighlight : MonoBehaviour
         lineRenderer.startWidth = startwidth;
         lineRenderer.endWidth = endwidth;
         scale = 1;
-        //material_red.SetFloat("_Metallic", 1.0f);
-        //material_red.SetFloat("_Glossiness", 0.0f);
-        //material_blue.SetFloat("_Metallic", 1.0f);
-        //material_blue.SetFloat("_Glossiness", 0.0f);
         material_dead.SetFloat("_Metallic", 1.0f);
         material_dead.SetFloat("_Glossiness", 0.0f);
+
+        positions = new Vector3[maxPoints];
+        posRestart(transform);
     }
 
     void Update()
     {
-        targetObject = transform;
-        if ((man && !man.Isdead && !tranningSetting.RedTeam.HumanControl && man.tankTeam == TankTeam.Tank_Red)
-            || ((tank && !tank.Isdead) && tranningSetting.RedTeam.HumanControl))
+        if(!isTrajectory)
         {
-            lineRenderer.enabled = true;
-            lineRenderer.material = material_red;
-        }
-        else if ((tank && !tank.Isdead && !tranningSetting.RedTeam.HumanControl)
-            || (man && !man.Isdead && !tranningSetting.RedTeam.HumanControl && man.tankTeam == TankTeam.Tank_Blue)
-            || (man && !man.Isdead && tranningSetting.RedTeam.HumanControl))
-        {
-            lineRenderer.enabled = true;
-            lineRenderer.material = material_blue;
-        }
-        else lineRenderer.enabled = false;
-
-        if (targetObject != null && lineRenderer != null)
-        {
-            // 设置LineRenderer的位置为目标个体的位置
-            Vector3 newTargetPos = new Vector3(targetObject.position.x, targetObject.position.y + 2, targetObject.position.z);
-            lineRenderer.transform.position = targetObject.position;
-            // 设置圆圈的半径，这里设置为50
+            targetObject = transform;
             if ((man && !man.Isdead && !tranningSetting.RedTeam.HumanControl && man.tankTeam == TankTeam.Tank_Red)
                 || ((tank && !tank.Isdead) && tranningSetting.RedTeam.HumanControl))
             {
-                SetCircleRadius(radius);
+                lineRenderer.enabled = true;
+                lineRenderer.material = material_red;
             }
             else if ((tank && !tank.Isdead && !tranningSetting.RedTeam.HumanControl)
                 || (man && !man.Isdead && !tranningSetting.RedTeam.HumanControl && man.tankTeam == TankTeam.Tank_Blue)
                 || (man && !man.Isdead && tranningSetting.RedTeam.HumanControl))
             {
+                lineRenderer.enabled = true;
+                lineRenderer.material = material_blue;
+            }
+            else lineRenderer.enabled = false;
+
+            if (targetObject != null && lineRenderer != null)
+            {
                 // 设置LineRenderer的位置为目标个体的位置
+                Vector3 newTargetPos = new Vector3(targetObject.position.x, targetObject.position.y + 2, targetObject.position.z);
                 lineRenderer.transform.position = targetObject.position;
                 // 设置圆圈的半径，这里设置为50
-                SetCircleRect(radius);
-                lineRenderer.positionCount = 5;
-                lineRenderer.startWidth = scale * startwidth;
-                lineRenderer.endWidth = scale * endwidth;
+                if ((man && !man.Isdead && !tranningSetting.RedTeam.HumanControl && man.tankTeam == TankTeam.Tank_Red)
+                    || ((tank && !tank.Isdead) && tranningSetting.RedTeam.HumanControl))
+                {
+                    SetCircleRadius(radius);
+                }
+                else if ((tank && !tank.Isdead && !tranningSetting.RedTeam.HumanControl)
+                    || (man && !man.Isdead && !tranningSetting.RedTeam.HumanControl && man.tankTeam == TankTeam.Tank_Blue)
+                    || (man && !man.Isdead && tranningSetting.RedTeam.HumanControl))
+                {
+                    // 设置LineRenderer的位置为目标个体的位置
+                    lineRenderer.transform.position = targetObject.position;
+                    // 设置圆圈的半径，这里设置为50
+                    SetCircleRect(radius);
+                    lineRenderer.positionCount = 5;
+                    lineRenderer.startWidth = scale * startwidth;
+                    lineRenderer.endWidth = scale * endwidth;
+                }
             }
         }
+        else
+        {
+            if ((man && !man.Isdead && !tranningSetting.RedTeam.HumanControl && man.tankTeam == TankTeam.Tank_Red)
+                || ((tank && !tank.Isdead) && tranningSetting.RedTeam.HumanControl))
+            {
+                lineRenderer.enabled = true;
+                lineRenderer.material = material_red;
+            }
+            else if ((tank && !tank.Isdead && !tranningSetting.RedTeam.HumanControl)
+                || (man && !man.Isdead && !tranningSetting.RedTeam.HumanControl && man.tankTeam == TankTeam.Tank_Blue)
+                || (man && !man.Isdead && tranningSetting.RedTeam.HumanControl))
+            {
+                lineRenderer.enabled = true;
+                lineRenderer.material = material_blue;
+            }
+            else lineRenderer.enabled = false;
+            UpdateTrajectory();
+            timer += Time.deltaTime;
+        }
+
     }
 
     // 设置LineRenderer的圆圈半径
@@ -110,6 +138,41 @@ public class CircleHighlight : MonoBehaviour
         for (int i = 0; i < squareCorners.Length; i++)
         {
             lineRenderer.SetPosition(i, squareCorners[i]);
+        }
+    }
+
+    void posRestart(Transform trans)
+    {
+        for (int i = positions.Length - 1; i > 0; i--)
+        {
+            positions[i] = new Vector3(trans.position.x, trans.position.y + 3, trans.position.z);
+        }
+    }
+
+    void UpdateTrajectory()
+    {
+        if (timer >= pointSpacing && !man.Isdead)
+        {
+            positions[0] = new Vector3(transform.position.x, transform.position.y + 3, transform.position.z);
+
+            if (Vector3.Distance(positions[0], positions[1]) > 20)
+            {
+                // 将当前位置添加到轨迹点数组
+                for (int i = positions.Length - 1; i > 0; i--)
+                {
+                    positions[i] = positions[i - 1];
+                }
+            }
+            // 设置 LineRenderer 的位置
+            lineRenderer.positionCount = Mathf.Min(maxPoints, positions.Length);
+            lineRenderer.SetPositions(positions);
+        }
+        else if (man.Isdead)
+        {
+            posRestart(transform);
+            // 设置 LineRenderer 的位置
+            lineRenderer.positionCount = Mathf.Min(maxPoints, positions.Length);
+            lineRenderer.SetPositions(positions);
         }
     }
 }
