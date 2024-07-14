@@ -11,7 +11,6 @@ public class FindEnemy : MonoBehaviour
     public TankSpawner tankSpawner;
     public BaseFunction baseFunction2;
     public ObstacleAvoid obstacleAvoid2;
-    public PathOptimize pathOptimize2;
     public TranningSetting trainingSetting;
     public float BackDistance1 = 50;//后撤距离
     public float BackDistance2 = 50;//后撤距离
@@ -23,7 +22,6 @@ public class FindEnemy : MonoBehaviour
         tankSpawner = FindObjectOfType<TankSpawner>();
         baseFunction2 = FindObjectOfType<BaseFunction>();
         obstacleAvoid2 = FindObjectOfType<ObstacleAvoid>();
-        pathOptimize2 = FindObjectOfType<PathOptimize>();
         trainingSetting = FindObjectOfType<TranningSetting>();
         setDis(trainingSetting.RedTeam.nums, trainingSetting.BlueTeam.nums, tankSpawner.useTA, trainingSetting.algorithmSelect.BioOptimized);
 
@@ -123,7 +121,7 @@ public class FindEnemy : MonoBehaviour
                     AmbushDis = 350;
                 }
             }
-            else if (redNum == 5 && blueNum == 5)
+            else// if (redNum == 5 && blueNum == 5)
             {
                 if (isOptimized)
                 {
@@ -138,6 +136,36 @@ public class FindEnemy : MonoBehaviour
                     BackDistance2 = 700;
                     AmbushDis = 450;
 
+                }
+            }
+        }
+        else
+        {
+            AmbushDis = 0;
+            if ((redNum == 3 && blueNum == 4) || (redNum == 4 && blueNum == 3))
+            {
+                if (isOptimized)
+                {
+                    BackDistance1 = 300;
+                    BackDistance2 = 300;
+                }
+                else
+                {
+                    BackDistance1 = 100;
+                    BackDistance2 = 100;
+                }
+            }
+            else
+            {
+                if (isOptimized)
+                {
+                    BackDistance1 = 700;
+                    BackDistance2 = 700;
+                }
+                else
+                {
+                    BackDistance1 = 500;
+                    BackDistance2 = 500;
                 }
             }
         }
@@ -222,31 +250,31 @@ public class FindEnemy : MonoBehaviour
                 man.relativespeed = 1.0f;
                 man.avoidAngle = 120.0f;
             }
-            target = attackedEnemy.transform.position;
+            target = man.Enemy_len != 0 ? attackedEnemy.transform.position : new Vector3(139.653137f, 5.54664707f, 606.299988f);
         }
 
 
         // 设置物体的位置
         Vector3 target2 = target;
 
-        //if (Mathf.Max(man.TeamMateRot) < 70 && man.enemyDisXOZ > man.BackDistance)
-        //{
-        //    //print(man.TankNum + ":  " + man.BioSameEnemyDir.First().Value.TankNum + ":  " + man.BioSameEnemyDir.First().Key);
-        //    man.HillIndex = judgeSelfPos(man);
-        //    switch (judgeSelfPos(man))
-        //    {
-        //        case -1:
-        //            target2 = target;
-        //            man.relativespeed = 1.0f;
-        //            break;
-        //        case 1:
-        //            target2 = baseFunction2.Set_point(man.transform, target - man.transform.position, 45, 30);
-        //            break;
-        //        case 2:
-        //            target2 = baseFunction2.Set_point(man.transform, target - man.transform.position, -45, 30);
-        //            break;
-        //    }
-        //}
+        if (Mathf.Max(man.TeamMateRot) < 70 && man.enemyDisXOZ > man.BackDistance)
+        {
+            //print(man.TankNum + ":  " + man.BioSameEnemyDir.First().Value.TankNum + ":  " + man.BioSameEnemyDir.First().Key);
+            man.HillIndex = judgeSelfPos(man, target);
+            switch (judgeSelfPos(man, target))
+            {
+                case -1:
+                    target2 = target;
+                    man.relativespeed = 1.0f;
+                    break;
+                case 1:
+                    target2 = baseFunction2.Set_point(man.transform, target - man.transform.position, 45, 30);
+                    break;
+                case 2:
+                    target2 = baseFunction2.Set_point(man.transform, target - man.transform.position, -45, 30);
+                    break;
+            }
+        }
 
         if (man.cannon_script2.ColliderFlag1)
         {
@@ -343,7 +371,7 @@ public class FindEnemy : MonoBehaviour
             man.enemyAngle = Vector3.Angle(newTarget, man.ShellPos.forward);
             man.enemyAngle1 = newTarget.normalized.y > man.cannon.transform.forward.normalized.y ?
                        man.enemyAngle : -man.enemyAngle;
-            man.OpenFire2(1, man.enemyAngle1, 1);
+            man.OpenFire(1, man.enemyAngle1, 1);
         }
 
     }
@@ -351,7 +379,10 @@ public class FindEnemy : MonoBehaviour
     public void TAScout(ManControl TATank, Transform transform)
     {
         TATank.Enemy_len = TATank.TAEnemydir.Count;
-        TATank.MinNum = TATank.Enemy_len != 0 ? TATank.enemyJudge2.enemyList[TATank.TankNum] : 1;
+        //TATank.enemyJudge2.AN_Enemy_View(TATank);
+        //TATank.infoCalculate2.judgeEnemyPos1(TATank);
+        TATank.MinNum = TATank.Enemy_len != 0 ?
+            (TATank.TAEnemydir.Values.Contains(tankSpawner.Biolist[TATank.enemyJudge2.enemyList[TATank.TankNum] - 1]) ? TATank.enemyJudge2.enemyList[TATank.TankNum] : TATank.TAEnemydir.First().Value.TankNum) : 1;
         TATank.relativespeed = 1;
         //TATank.NUM_Text.text = (TATank.TankNum + 1).ToString() + "-" + (TATank.MinNum).ToString();
 
@@ -363,7 +394,7 @@ public class FindEnemy : MonoBehaviour
         TempRot[1] = baseFunction2.CrossCalculate1(transform, attackedEnemy.transform);
         TATank.Enemyinf[2] = TempRot[1];//右边为正左边为负值
 
-        TATank.target1 = tankSpawner.Biolist[TATank.MinNum - 1].transform.position;
+        TATank.target1 = TATank.Enemy_len != 0 ? tankSpawner.Biolist[TATank.MinNum - 1].transform.position : new Vector3(139.653137f, 5.54664707f, 606.299988f);
         if (TATank.baseFunction2.CalculateDisX0Z(TATank.target1, TATank.transform.position) > 30)
             TATank.offset = ((TATank.target1 - TATank.transform.position).normalized + obstacleAvoid2.ObstacleVector(TATank, 45, 30).normalized + NRTeamMateAvoid(TATank, trainingSetting.BlueTeam.nums, 50)).normalized;//obstacleAvoid2.CacPosition(TATank, transform, TATank.target1, 180);//通过避障函数求出运行方向
         else
@@ -392,7 +423,7 @@ public class FindEnemy : MonoBehaviour
             TATank.enemyAngle = Vector3.Angle(newTarget, TATank.ShellPos.forward);
             TATank.enemyAngle1 = newTarget.normalized.y > TATank.cannon.transform.forward.normalized.y ?
                        TATank.enemyAngle : -TATank.enemyAngle;
-            TATank.OpenFire3(1, TATank.enemyAngle1, 1);
+            TATank.OpenFire(1, TATank.enemyAngle1, 1);
         }
     }
 
@@ -420,21 +451,16 @@ public class FindEnemy : MonoBehaviour
         return AllTeamMateDir;
     }
 
-    public int judgeSelfPos(ManControl man)
+    public int judgeSelfPos(ManControl man, Vector3 target)
     {
         int result = -1;
-        if (man.BioSameEnemyDir.Count != 0)
-        {
-            //int SameEnemyDirLen = man.BioSameEnemyDir.Count;
-            if (man.EnemyDis[man.MinNum - 1] < man.BioSameEnemyDir.Last().Key)
-            {
-                if (man.TeamMateSingleRot[man.BioSameEnemyDir.Last().Value.TankNum - 1] > 0)
-                    result = 1;
-                else if (man.TeamMateSingleRot[man.BioSameEnemyDir.Last().Value.TankNum - 1] < 0)
-                    result = 2;//左侧小于零
-            }
-        }
-
+        Vector3 Dir1 = target - man.infoCalculate2.CalculateCnter(tankSpawner.Biolist);//我方中心到的敌方目标个体的向量
+        Dir1 = new Vector3(Dir1.x, 0, Dir1.z);
+        Vector3 Dir2 = target - man.transform.position;
+        Dir2 = new Vector3(Dir2.x, 0, Dir2.z);
+        float angle = Vector3.SignedAngle(Dir1, Dir2, Vector3.up);
+        if (angle > 15.0f) result = 1;
+        else if (angle < -15.0f) result = 2;
         return result;
     }
 
@@ -446,9 +472,12 @@ public class FindEnemy : MonoBehaviour
             if (man.TeamMateSingleRot[i] < 0) right++;//右侧队友数量加一
             else if (man.TeamMateSingleRot[i] > 0) left++;//左侧队友数量加一
         }
-        if (((right >= 1 && right <= 4) && left == 0) || ((right == 2  || right == 3) && left == 1)) result = 1;//位于队伍左侧
-        else if(((left >= 1 && left <= 4) && right == 0) || ((left == 2 || left == 3) && right == 1)) result = 2;
-        else if ((right == 2 && left == 2) && (right == 1 && left == 1)) result = 0;
+        if (right > left && right - left >= 2 * trainingSetting.RedTeam.nums / 5) result = 1;
+        else if (left > right && left - right >= 2 * trainingSetting.RedTeam.nums / 5) result = 2;
+        else if (Mathf.Abs(right - left) < 2 * trainingSetting.RedTeam.nums / 5) result = -1;
+        //if (((right >= 1 && right <= 4) && left == 0) || ((right == 2  || right == 3) && left == 1)) result = 1;//位于队伍左侧
+        //else if(((left >= 1 && left <= 4) && right == 0) || ((left == 2 || left == 3) && right == 1)) result = 2;
+        //else if ((right == 2 && left == 2) && (right == 1 && left == 1)) result = 0;
 
         return result;
     }
@@ -543,190 +572,6 @@ public class FindEnemy : MonoBehaviour
         return target;
     }
 
-
-    public void attack_point(ManControl man, Vector3 target_point)
-    {
-        float dis = Vector3.Distance(man.transform.position, target_point);
-        man.Enemyinf[0] = dis;
-        float angle = baseFunction2.DotCalculate4(man.transform, target_point);
-        man.Enemyinf[1] = angle;
-        if (dis < man.OpenFireDis && angle < 5.0f)
-        {
-            //RealShoot(man, tankSpawner.BlueAgentsList[man.MinNum - 1].transform.position);
-            //计算坦克炮筒与对手在XOZ平面的夹角
-            man.enemyAngle = baseFunction2.DotCalculate3_1(target_point, man.transform.position);
-            Vector3 enemyPos = target_point;
-            //float[] optimize_result = new float[2];
-            //man.optimize_result = optimitize_openfire(man, enemyPos, man.shell_start_pos, man.shell_collider_pos, man.enemyAngle1);
-            Vector3 vector3 = new Vector3(enemyPos.x, enemyPos.y + 2 + man.optimize_result[1], enemyPos.z) - man.cannon.transform.position;
-            //man.enemyAngle = Vector3.Angle(new Vector3(0f, man.cannon.transform.forward.y, 0f), new Vector3(0f, vector3.y, 0f));
-            man.enemyAngle = Vector3.Angle(man.cannon.transform.forward, vector3);// + man.setEnemyAngle1;
-                                                                                  //如果setEnemyAngle1 = -1，表示此时角度由计算得出，否则炮筒角度由setEnemyAngle1直接赋值
-                                                                                  //if (man.setEnemyAngle1 == -1) man.enemyAngle1 =
-                                                                                  //        vector3.normalized.y > man.cannon.transform.forward.normalized.y ?
-                                                                                  //        man.enemyAngle : -man.enemyAngle;
-                                                                                  //else man.enemyAngle1 = man.setEnemyAngle1 < 0 ? 0 : man.setEnemyAngle1;
-                                                                                  //man.optimize_result = optimitize_openfire(man, enemyPos, man.shell_start_pos, man.shell_collider_pos, man.enemyAngle1);
-            man.enemyAngle1 = vector3.normalized.y > man.cannon.transform.forward.normalized.y ?
-                   man.enemyAngle : -man.enemyAngle;
-            //man.enemyAngle1 = man.enemyAngle;
-
-            //炮弹速度补偿，根据自身高度调整射速
-            if (man.speedControl == true
-                || baseFunction2.CalculateDisX0Z(man.transform.position, target_point) <= man.BackDistance)
-            {
-                float fireSpeedOffset = man.transform.position.y > target_point.y ?
-                man.transform.position.y - target_point.y : 0;
-                fireSpeedOffset = fireSpeedOffset / 30.0f * 2.5f;
-                man.testFireSpeeed = 1 - fireSpeedOffset;
-            }
-            else
-            {
-                if (baseFunction2.CalculateDisX0Z(man.transform.position, target_point) > man.BackDistance)
-                {
-                    man.testFireSpeeed = 1.0f;
-                }
-            }
-
-            man.testFireSpeeed = man.optimize_result[0];
-            if (man.SetFireSpeeed != -1)
-            {
-                man.testFireSpeeed = man.SetFireSpeeed;
-            }
-
-            if (dis > 10.0f)
-            {
-
-                man.OpenFire2(1, man.enemyAngle1, 1);
-            }
-            else if (dis <= 10.0f)
-                man.OpenFire2(-0.5f, man.enemyAngle1, 1);
-        }
-    }
-
-    /*
-     分情况讨论：
-    1、低处打高处，如果短了就角度补偿，长了就速度补偿
-    2、高处打低处，即坦克角度为0，速度补偿
-     */
-    //public float[] result = new float[2];
-
-    float[] optimitize_openfire(ManControl man, Vector3 enemy_pos, Vector3 shell_start, Vector3 shell_end, float enemy_angle)
-    {
-
-        if (enemy_angle < -1.0f)//高打低、低打高但是炮筒斜着朝上
-        {
-            //man.cooldowntime = 100;
-            if (man.SameFireCount < 3)//同一对手坦克发炮次数小于5
-            {
-                man.optimize_result[0] = 1 + enemy_angle / 18.0f;
-            }
-            else
-            {
-                if (man.left_edge == 1)
-                {
-                    man.left_edge = -1;
-                    man.right_edge = 1;
-                    man.optimize_result[0] = 1 + enemy_angle / 16.0f;
-                }
-                if (Mathf.Abs(man.left_edge - man.right_edge) < 0.01)
-                {
-                    man.left_edge = -1;
-                    man.right_edge = 1;
-                    man.optimize_result[0] = 1 + enemy_angle / 16.0f;
-                }
-                //if(man.firetime < 50)
-                //{
-                if (man.shell_collider_pos != Vector3.zero)
-                {
-
-                    man.shell_dis = baseFunction2.CalculateDisX0Z(shell_start, shell_end);
-                }
-                else
-                {
-
-                    man.shell_dis = 1000;
-                }
-                man.bio_enemy_dis = baseFunction2.CalculateDisX0Z(man.transform.position, enemy_pos);
-
-
-                //if (man.CalFireCount == 0) print("111");
-                if (man.bio_enemy_dis >= man.shell_dis && man.CalFireCount == 0)
-                {
-                    //print("112");
-                    man.CalFireCount++;
-                    man.left_edge = man.optimize_result[0];
-                    man.optimize_result[0] = (man.left_edge + man.right_edge) / 2;
-                    //right_edge = 
-                }
-                else if (man.firetime > 70 && man.CalFireCount == 0)
-                {
-                    man.CalFireCount++;
-                    //left_edge = man.fire_speed_buffer;
-                    man.right_edge = man.optimize_result[0];
-                    man.optimize_result[0] = (man.left_edge + man.right_edge) / 2;
-                }
-                //man.fire_speed_buffer = man.optimize_result[0];
-
-                //}
-            }
-
-        }
-        else
-        {
-            //man.cooldowntime = 80;
-            man.optimize_result[0] = 1;
-        }
-
-        if (man.firetime < 50)
-        {
-            man.bio_enemy_dis = baseFunction2.CalculateDisX0Z(man.transform.position, enemy_pos);
-            man.shell_dis = baseFunction2.CalculateDisX0Z(shell_start, shell_end);
-
-            if (man.bio_enemy_dis > man.shell_dis && man.CalFireCount1 == 0)//表示对手在山顶，但自己只能打到山坡
-            {
-                man.CalFireCount1++;
-                if (man.SameFireCount <= 2)
-                {
-                    man.fire_speed_buffer = man.optimize_result[1];
-                    //man.optimize_result[1] = 1.0f + enemy_pos.y - shell_end.y;
-                    if (man.bio_enemy_dis - man.shell_dis > 20)
-                    {
-                        man.optimize_result[1] = 1.5f + 3.0f * Mathf.Sqrt(man.SameFireCount) + enemy_pos.y - shell_end.y;
-                    }
-                    else
-                        man.optimize_result[1] = 1.5f + 1.0f * Mathf.Sqrt(man.SameFireCount) + enemy_pos.y - shell_end.y;
-                }
-                else
-                {
-                    //man.optimize_result[1] = enemy_pos.y - shell_end.y + 1.0f * (man.SameFireCount - 2);
-                    if (man.bio_enemy_dis - man.shell_dis > 20)
-                    {
-                        man.optimize_result[1] = 1.5f + 3.0f * Mathf.Sqrt(man.SameFireCount) + enemy_pos.y - shell_end.y;
-                    }
-                    else
-                        man.optimize_result[1] = enemy_pos.y - shell_end.y + 1.5f + 1.2f * Mathf.Sqrt(man.SameFireCount);
-                }
-                //man.optimize_result[1] = man.optimize_result[1] + enemy_pos.y - shell_end.y;
-            }
-
-        }
-        else if (man.CalFireCount1 == 0)
-        {
-            man.CalFireCount1++;
-            //if (man.TankNum == 3)print("--");
-            if (man.optimize_result[1] > 5) man.optimize_result[1] -= 1.5f;
-            else man.optimize_result[1] -= 0.5f;
-            if (man.optimize_result[1] <= 0) man.optimize_result[1] = 0;
-        }
-
-        if (man.optimize_result[1] < 0)
-        {
-            //if (man.TankNum == 3) print("-1");
-            man.optimize_result[1] = 2;
-        }
-        return man.optimize_result;
-    }
 
     void behavior_control(ManControl man, Transform transform)
     {

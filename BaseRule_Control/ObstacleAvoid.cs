@@ -132,14 +132,14 @@ public class ObstacleAvoid : MonoBehaviour
                     speed = new float[] { 0.2f, 0.2f };
                 }
             }
-            else if (redNum == 5 && blueNum == 5)
+            else
             {
                 if (isOptimized)
                 {
-                    roundTime = new float[] { 15, 20, 5, 5 };
+                    roundTime = new float[] { 25, 25, 25, 25 };
                     angle = new float[] { -60, 60, 45, -45 };
                     dis = new float[] { 1000, 400, 200 };
-                    speed = new float[] { 0.1f, 0.2f };
+                    speed = new float[] { 1.0f, 1.0f };
                     //roundTime = new float[] { 5, 20, 5, 5 };
                     //angle = new float[] { -60, 60, 45, -45 };
                     //dis = new float[] { 800, 100, 200 };
@@ -156,6 +156,39 @@ public class ObstacleAvoid : MonoBehaviour
                     dis = new float[] { 800, 100, 300 };
                     speed = new float[] { 0.2f, 0.2f };
 
+                }
+            }
+        }
+        else
+        {
+            dis[0] = 800;
+            dis[1] = 100;
+            angle = new float[] { 60, -60, 45, -45 };
+            speed = new float[] {0.1f, 0.2f};
+            if (redNum == 3)
+                roundTime = new float[] { 22, 20, 25, 22 };  //表示规则方在右上、右下、左下、右上位置时两侧坦克开局时向两侧移动的时间（22,20,25,22）
+            else if (redNum > 3)
+                roundTime = new float[] { 5, 20, 5, 5 };//91:6 5、15、5、5
+            if ((redNum == 3 && blueNum == 4) || (redNum == 4 && blueNum == 3))
+            {
+                if (isOptimized)
+                {
+                    dis[2] = 300;
+                }
+                else
+                {
+                    dis[2] = 100;
+                }
+            }
+            else
+            {
+                if (isOptimized)
+                {
+                    dis[2] = 500;
+                }
+                else
+                {
+                    dis[2] = 50;
                 }
             }
         }
@@ -289,7 +322,7 @@ public class ObstacleAvoid : MonoBehaviour
         else
             isEnmey = false;
 
-        if (((man.target_dis < man.BackDistance - dis[1] && man.firetime < 300)||
+        if (((man.target_dis < man.BackDistance - dis[1] && man.firetime < 300 && Mathf.Max(man.TeamMateRot) < 90 ) ||
         (man.speedControl == true && man.enemyDisXOZ < dis[2] && man.firetime > 300)) && man.rotateFlag != 1 && isEnmey)
             man.relativespeed = -1.0f;
         EnemyDir = (target - transform.position).normalized;
@@ -303,14 +336,16 @@ public class ObstacleAvoid : MonoBehaviour
             //if (man.TankNum == 7) print(TeamMateDis);
             if ((TeamMateDis < man.TeammateAvoidDis) && TeamMateDis != 10000.0f && position_y < 4)
             {
-                if ((man.MinNum == -1) && tankSpawner.Biolist[i].transform.position != target)
+                if (man.relativespeed == 1.0f)
                 {
                     TeamMateDir = (transform.position - tankSpawner.Biolist[i].transform.position).normalized/
                         Vector3.Distance(transform.position, tankSpawner.Biolist[i].transform.position);
+                    //if(angle > 120) man.relativespeed = 1.0f;
                 }
                 else
-                    TeamMateDir = Vector3.zero;
-                
+                    TeamMateDir = (tankSpawner.Biolist[i].transform.position - transform.position).normalized /
+                        Vector3.Distance(transform.position, tankSpawner.Biolist[i].transform.position);
+
             }
             else
             {

@@ -143,7 +143,14 @@ public class ManControl : MonoBehaviour
 
 	//算法比较时用的列表
 	public SortedDictionary<float, ManControl> TAEnemydir = new();
+	public SortedDictionary<float, ManControl> TAEnemydir1 = new();
 	public SortedDictionary<float, ManControl> BioEnemydirTA = new();
+	//论文对照算法使用到的变量
+	//public int[] enemyList;
+	//public Vector3 TATankCenter;
+	//public SortedDictionary<float, ManControl> SortEnemyDis = new();
+	//public SortedDictionary<float, ManControl> TASameEnemyDir = new();
+
 
 
 	[HideInInspector]
@@ -203,6 +210,7 @@ public class ManControl : MonoBehaviour
 	{
 		MinNum = -1;
 		TankInitialization();
+		//enemyList = new int[trainingSetting.BlueTeam.nums];
 		lineRenderer = GetComponent<LineRenderer>();
 		lineRenderer.startWidth = 1.0f;
 		lineRenderer.endWidth = 1.0f;
@@ -210,8 +218,6 @@ public class ManControl : MonoBehaviour
 		MinNumBuffer = new int[] { -1, -1 };
 		//UnityEngine.Debug.Log("tankSpawner.Biolist" + tankSpawner.Biolist.Count);
 		StartCoroutine(Coroutine());
-		if (TankNum == 1 || TankNum == 2 || TankNum == 3) MinNum = 3;
-		if (TankNum == 4 || TankNum == 5) MinNum = 2;
 
 	}
 	IEnumerator Coroutine()
@@ -238,7 +244,7 @@ public class ManControl : MonoBehaviour
 				if (!trainingSetting.RedTeam.HumanControl && (MinNum == -1 || switchtime > switchlimit))
 				{
 					switchtime = 0;
-					//enemyJudge2.Judge(this);
+					enemyJudge2.Judge(this);
 				}
 				if (trainingSetting.RedTeam.HumanControl)
 				{
@@ -283,9 +289,7 @@ public class ManControl : MonoBehaviour
 			if (Vector3.Distance(transform.position, hit.point) > 5.0f)
 			{
 				_rigidbody.AddForce(Vector3.down * 2000000f, ForceMode.Impulse);
-				//if (TankNum == 1) print("down: " + Vector3.Distance(transform.position, hit.point));
 			}
-			//if (TankNum == 1) print("down: " + Vector3.Distance(transform.position, hit.point));
 		}
 	}
 
@@ -588,40 +592,13 @@ public class ManControl : MonoBehaviour
 
 		if (h_value != 0)
 		{
-			//if (v_value > -0.25f)
-			//h_value = -h_value;
 			transform.Rotate(h_value * rotatespeed * Time.deltaTime * Vector3.up);
 		}
 
 	}
 
-	//发射炮弹代码
-	public void OpenFire(float shellSpeed, int flags)
-	{
-		if (shell != null && flags == 1 && (firetime >= cooldowntime))
-		{
-			print("11");
-			shell_start_pos = ShellPos.position;//记录炮弹发射时的坐标
-			shell_collider_pos = Vector3.zero;
-			GameObject shellObj = Instantiate(shell, ShellPos.position, ShellPos.transform.rotation);
-			Rigidbody shellRigidbody = shellObj.GetComponent<Rigidbody>();
-			if (shellRigidbody != null)
-			{
-				Firevalue = (shellSpeed + 1) * 900.0f + 5.0f;
-				//确保发炮速度不小于移动速度
-				if (Firevalue > vvlue)
-					shellRigidbody.velocity = ShellPos.forward * Firevalue;
-				else
-					shellRigidbody.velocity = ShellPos.forward * vvlue;
-				shellObj.SendMessage("Set_father", this.gameObject);
-			}
-			++fire;
-			firetime = 0;
-		}
-	}
-
 	//发射炮弹代码(炮筒可旋转)
-	public void OpenFire2(float shellSpeed, float shellAngle, int flags)
+	public void OpenFire(float shellSpeed, float shellAngle, int flags)
 	{
 		//将炮筒旋转角度限制在0 - 35度
 		shellAngle = shellAngle < 25.0f ? shellAngle : 25.0f;
@@ -710,7 +687,7 @@ public class ManControl : MonoBehaviour
 
 
 		//当炮筒旋转至设定角度后才能开炮
-		if (shell != null && flags == 1 && (firetime >= cooldowntime) && fire <= 40 &&
+		if (shell != null && flags == 1 && (firetime >= cooldowntime) && fire <= 40 && 
 			enemyAngle1 < 0.5f)//0.1为一个补偿值，因为炮筒角度不能真正达到设定角度，只能无限逼近
 		{
 			CalFireCount = 0;
@@ -733,49 +710,6 @@ public class ManControl : MonoBehaviour
 			firetime = 0;
 		}
 
-	}
-	//发射炮弹代码(炮筒可旋转)
-	public void OpenFire1(float shellSpeed, float shellAngle, int flags)
-	{
-		//将炮筒旋转角度限制在0 - 35度
-		shellAngle = shellAngle < 20.0f ? shellAngle : 20.0f;
-		shellAngle = shellAngle > -5.0f ? shellAngle : -5.0f;
-
-		if (-(baseFunction2.angleOffset(cannon.localRotation.eulerAngles.x)) <= shellAngle && -(baseFunction2.angleOffset(cannon.localRotation.eulerAngles.x)) < 20.0f)
-		{
-			cannon.Rotate(-Vector3.right, 0.5f);
-		}
-		if (-(baseFunction2.angleOffset(cannon.localRotation.eulerAngles.x)) > shellAngle && -(baseFunction2.angleOffset(cannon.localRotation.eulerAngles.x)) > -5.0f)
-		{
-			cannon.Rotate(Vector3.right, 0.5f);
-		}
-
-		//当炮筒旋转至设定角度后才能开炮
-		if (shell != null && flags == 1 && (firetime >= cooldowntime) && fire <= 40
-			&& !ControlFlag)//0.1为一个补偿值，因为炮筒角度不能真正达到设定角度，只能无限逼近
-		{
-			CalFireCount = 0;
-			CalFireCount1 = 0;
-			shell_collider_pos = Vector3.zero;
-			SameFireCount++;
-			shell_start_pos = ShellPos.position;//记录炮弹发射时的坐标
-			GameObject shellObj = Instantiate(shell, ShellPos.position, ShellPos.transform.rotation);
-			Rigidbody shellRigidbody = shellObj.GetComponent<Rigidbody>();
-			ShellControl shell_script = shellObj.GetComponent<ShellControl>();
-
-			if (shellRigidbody != null)
-			{
-				Firevalue = (shellSpeed + 1) * 900.0f + 5.0f;//发炮速度：5-50m/s
-															 //确保发炮速度不小于移动速度
-				if (Firevalue > vvlue)
-					shellRigidbody.velocity = ShellPos.forward * Firevalue;
-				else
-					shellRigidbody.velocity = ShellPos.forward * vvlue;
-				shellObj.GetComponent<ShellControl>().Set_father(gameObject);
-			}
-			++fire;
-			firetime = 0;
-		}
 	}
 
 	//炮弹造成伤害代码
@@ -857,7 +791,7 @@ public class ManControl : MonoBehaviour
 			//else move(0, 0);
 
 
-			findEnemy2.attack_point(this, target_point);
+			//findEnemy2.attack_point(this, target_point);
 
 		}
 	}
@@ -876,42 +810,6 @@ public class ManControl : MonoBehaviour
 	//		tmp.fontSharedMaterial = newMaterial;
 	//	}
 	//}
-
-	//手动操作代码
-	public void Heuristic()
-	{
-
-		float Speed = Input.GetAxis(inputSpeedlStr);
-		if (Speed != 0)
-		{
-			print(inputSpeedlStr);
-
-		}
-		print(Speed);
-
-		float Rotate = Input.GetAxis(inputRotatelStr);
-
-
-		move(Speed * MaxSpeed, Rotate * rotatespeed);
-		if (Input.GetButtonDown(inputFirestr))
-		{
-			fireSpeed = FireMinspeed;
-		}
-		else if (Input.GetButton(inputFirestr))
-		{
-			fireSpeed += Time.deltaTime * (FireMaxspeed - FireMinspeed) / Loading_time;
-			if (fireSpeed > FireMaxspeed)
-			{
-				OpenFire(1f, 1);
-				fireSpeed = FireMinspeed;
-			}
-		}
-		else if (Input.GetButtonUp(inputFirestr))
-		{
-			OpenFire(fireSpeed / FireMaxspeed, 1);
-			fireSpeed = FireMinspeed;
-		}
-	}
 
 	// 限制角度在指定范围内的辅助函数
 	public float ClampAngle(float angle, float min, float max)

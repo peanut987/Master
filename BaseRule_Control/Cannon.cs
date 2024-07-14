@@ -35,8 +35,8 @@ public class Cannon : MonoBehaviour
 		}
 		else
 		{
-			cannon_line.startWidth = 4.5f;
-			cannon_line.endWidth = 4.5f;
+			cannon_line.startWidth = 0.5f;
+			cannon_line.endWidth = 0.5f;
 			castDis = 1250.0f;
 		}
 		setRadius(manControl.trainingSetting.RedTeam.nums, manControl.trainingSetting.BlueTeam.nums, tankSpawner.useTA, manControl.trainingSetting.algorithmSelect.BioOptimized);
@@ -46,10 +46,7 @@ public class Cannon : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		Vector3 toward = (tankSpawner.TAList[manControl.MinNum - 1].transform.position - manControl.transform.position).normalized;
-		castDis = Vector3.Distance(tankSpawner.TAList[manControl.MinNum - 1].transform.position, manControl.transform.position);
-		Cannon_Ray_Cast(shellPos.position, shellPos.position + toward * castDis);
-		//Cannon_Ray_Cast(shellPos.position, shellPos.position + transform.forward.normalized * castDis);
+		Cannon_Ray_Cast(shellPos.position, shellPos.position + transform.forward.normalized * castDis);
 	}
 
 	public void Cannon_Ray_Cast(Vector3 Satrt, Vector3 End)
@@ -68,8 +65,7 @@ public class Cannon : MonoBehaviour
 
 		// 发射射线
 		Ray ray = new Ray(start, direction);
-		int Rmask = LayerMask.GetMask("Tank");// | LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("wall");
-		//int Rmask = LayerMask.GetMask("Tank") | LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("wall");
+		int Rmask = LayerMask.GetMask("Tank") | LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("wall");
 		RaycastHit hit;
 
 		if (Physics.SphereCast(ray, sphereRadius ,out hit, castDis) && ((hit.collider.tag == "Tank_Blue" && manControl.tankTeam == TankTeam.Tank_Red)) && !manControl.Isdead)
@@ -102,7 +98,7 @@ public class Cannon : MonoBehaviour
 			}
 
 		}
-		else if (Physics.Raycast(ray, out hit, castDis) && (hit.collider.tag == "Tank_Red" && manControl.tankTeam == TankTeam.Tank_Blue))
+		else if (Physics.SphereCast(ray, sphereRadius, out hit, castDis) && (hit.collider.tag == "Tank_Red" && manControl.tankTeam == TankTeam.Tank_Blue))
         {
 			// 如果射线碰撞到物体，绘制从起点到碰撞点的线段
 			cannon_line.SetPosition(0, start);
@@ -149,10 +145,10 @@ public class Cannon : MonoBehaviour
 			{
 				cannon_line.SetPosition(0, start);
 				cannon_line.SetPosition(1, End);
-				cannon_line.enabled = true;
+				cannon_line.enabled = false;
 			} 
 			else
-				cannon_line.enabled = true;
+				cannon_line.enabled = false;
 
 		}
 	}
@@ -206,6 +202,14 @@ public class Cannon : MonoBehaviour
 				}
 			}
 		}
+        else
+        {
+            if (!isOptimized)
+            {
+				castDis = 150;
+				sphereRadius = 0.7f;
+			}
+        }
 		//print(sphereRadius);
 	}
 }

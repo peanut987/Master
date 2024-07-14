@@ -18,13 +18,13 @@ public class EnemyJudge : MonoBehaviour
 	private Dictionary<int, int> teamLeaders = new Dictionary<int, int>();
 	public List<Transform> tanks = new List<Transform>();
 
-	//论文对照算法使用到的变量
-	public int[] enemyList;
-	public Vector3 TATankCenter;
-	public SortedDictionary<float, ManControl> SortEnemyDis = new();
-	public SortedDictionary<float, ManControl> BioSameEnemyDir = new();
+    //论文对照算法使用到的变量
+    public int[] enemyList;
+    public Vector3 TATankCenter;
+    public SortedDictionary<float, ManControl> SortEnemyDis = new();
+    public SortedDictionary<float, ManControl> BioSameEnemyDir = new();
 
-	void Start()
+    void Start()
 	{
 		trainingSetting = FindObjectOfType<TranningSetting>();
 		tankSpawner = FindObjectOfType<TankSpawner>();
@@ -58,7 +58,7 @@ public class EnemyJudge : MonoBehaviour
 		}
 		man.MinNum = index + 1;
 
-		if (man.BioEnemydir.Count != 0)// && man.BioEnemydir.Count > 1)
+		if (man.BioEnemydir.Count != 0 || man.BioEnemydirTA.Count != 0)// && man.BioEnemydir.Count > 1)
 			man.MinNum = findCloseEnemy(man) + 1;
 
 
@@ -93,17 +93,17 @@ public class EnemyJudge : MonoBehaviour
 				float dis0 = man.MinNumBuffer[0] != -1 ? Vector3.Distance(man.transform.position, item0.transform.position) : 0.0f;
 				float dis1 = man.MinNumBuffer[1] != -1 ? Vector3.Distance(man.transform.position, item1.transform.position) : 0.0f;
 
-				//if (Mathf.Abs(dis0 - dis1) < 20 && dis0 > 200 && !item1.Isdead)
-				//{
-				//	man.MinNum = man.MinNumBuffer[1];
-				//	man.MinNumBuffer[0] = man.MinNumBuffer[1];
-				//}
-				//else
-				//{
-				//	man.SameFireCount = 0;
-				//	man.left_edge = -1;
-				//	man.right_edge = 1;
-				//}
+				if (Mathf.Abs(dis0 - dis1) < 20 && dis0 > 200 && !item1.Isdead)
+				{
+					man.MinNum = man.MinNumBuffer[1];
+					man.MinNumBuffer[0] = man.MinNumBuffer[1];
+				}
+				else
+				{
+					man.SameFireCount = 0;
+					man.left_edge = -1;
+					man.right_edge = 1;
+				}
 			}
 		}
 
@@ -164,83 +164,141 @@ public class EnemyJudge : MonoBehaviour
 
 	}
 
+    //public void AN_Enemy_View(ManControl TATank)
+    //{
+    //	//求己方中心点
+    //	TATank.TATankCenter = Vector3.zero;
+    //	TATank.MinNum = -1;
+    //	TATank.assignFlag = false;
+    //	int aliveNum = 0;
 
-	public void AN_Enemy()
-	{
-		//求己方中心点
-		TATankCenter = Vector3.zero;
-		int aliveNum = 0;
-		foreach (var tank in tankSpawner.TAList)
-		{
-			tank.MinNum = -1;
-			tank.assignFlag = false;
-			if (!tank.Isdead)
-			{
-				aliveNum++;
-				TATankCenter += tank.transform.position;
-			}
+    //	foreach (var tank in tankSpawner.TAList)
+    //	{
+    //		if (!tank.Isdead)
+    //		{
+    //			aliveNum++;
+    //			TATank.TATankCenter += tank.transform.position;
+    //		}
+
+    //	}
+    //	for (int i = 0; i < tankSpawner.TAList.Count; i++)
+    //	{
+    //		TATank.enemyList[i] = 0;
+
+    //	}
+    //	TATank.TATankCenter = TATank.TATankCenter / aliveNum;
+
+    //	//给对手距离己方中心点排序
+    //	TATank.SortEnemyDis.Clear();
+    //	foreach (var enemy in TATank.TAEnemydir.Values)
+    //	{
+    //		if (!enemy.Isdead)
+    //		{
+    //			float dis = baseFunction.CalculateDisX0Z(enemy.transform.position, TATank.TATankCenter);
+    //			TATank.SortEnemyDis.TryAdd(dis, enemy);
+    //		}
+
+    //	}
+
+    //	//分配距离中心点最近的对手
+    //	for (int i = 0; i < TATank.SortEnemyDis.Count; i++)
+    //	{
+    //		TATank.TASameEnemyDir.Clear();
+    //		foreach (var tank in tankSpawner.TAList)
+    //		{
+    //			if (!tank.assignFlag && !tank.Isdead && tank.TAEnemydir.Values.Contains(TATank.SortEnemyDis.ElementAt(i).Value))
+    //			{
+    //				float dis = baseFunction.CalculateDisX0Z(tank.transform.position, TATank.SortEnemyDis.ElementAt(i).Value.transform.position);
+    //				TATank.TASameEnemyDir.TryAdd(dis, tank);
+    //			}
+
+    //		}
+
+    //		if(TATank.TankNum == TATank.TASameEnemyDir.First().Value.TankNum )
+    //           {
+    //			TATank.MinNum = TATank.SortEnemyDis.ElementAt(i).Value.TankNum;
+    //			TATank.assignFlag = true;
+    //			break;
+    //           }
+    //		//foreach (var tank in tankSpawner.TAList)
+    //		//{
+    //		//	if (!tank.assignFlag && !tank.Isdead && tank.TankNum == BioSameEnemyDir.First().Value.TankNum)
+    //		//	{
+    //		//		enemyList[tank.TankNum] = SortEnemyDis.ElementAt(i).Value.TankNum;
+    //		//		tank.assignFlag = true;
+    //		//	}
+    //		//}
+    //	}
+
+    //	if(TATank.MinNum == -1 && !TATank.Isdead && TATank.TAEnemydir.Count != 0) TATank.MinNum = TATank.TAEnemydir.First().Value.TankNum;
+    //}
+
+    public void AN_Enemy()
+    {
+        //求己方中心点
+        TATankCenter = Vector3.zero;
+        int aliveNum = 0;
+        foreach (var tank in tankSpawner.TAList)
+        {
+            tank.MinNum = -1;
+            tank.assignFlag = false;
+            if (!tank.Isdead)
+            {
+                aliveNum++;
+                TATankCenter += tank.transform.position;
+            }
 
         }
-		for (int i = 0; i < tankSpawner.TAList.Count; i++)
-		{
-			enemyList[i] = 0;
-
-		}
-		TATankCenter = TATankCenter / aliveNum;
-
-		//给对手距离己方中心点排序
-		SortEnemyDis.Clear();
-		foreach (var enemy in tankSpawner.Biolist)
-		{
-			if(!enemy.Isdead)
-            {
-				float dis = baseFunction.CalculateDisX0Z(enemy.transform.position, TATankCenter);
-				SortEnemyDis.TryAdd(dis, enemy);
-			}
-
-		}
-
-		//分配距离中心点最近的对手
-		for (int i = 0; i < SortEnemyDis.Count; i++)
-		{
-			BioSameEnemyDir.Clear();
-			foreach (var tank in tankSpawner.TAList)
-			{
-				if (!tank.assignFlag && !tank.Isdead)
-				{
-					float dis = baseFunction.CalculateDisX0Z(tank.transform.position, SortEnemyDis.ElementAt(i).Value.transform.position);
-					BioSameEnemyDir.TryAdd(dis,tank);					
-				}
-
-			}
-			foreach (var tank in tankSpawner.TAList)
-			{
-				if (!tank.assignFlag && !tank.Isdead && tank.TankNum == BioSameEnemyDir.First().Value.TankNum)
-                {
-				    enemyList[tank.TankNum] = SortEnemyDis.ElementAt(i).Value.TankNum;
-					tank.assignFlag = true;
-				}
-			}
-		}
-
-		foreach (var tank in tankSpawner.TAList)
+        for (int i = 0; i < tankSpawner.TAList.Count; i++)
         {
-			if (enemyList[tank.TankNum] == 0 && !tank.Isdead && tank.TAEnemydir.Count != 0) enemyList[tank.TankNum] = tank.TAEnemydir.First().Value.TankNum;
-		}
-		//foreach (var tank in tankSpawner.TAList)
-		//{
-		//	tank.MinNum = enemyList[tank.TankNum];
-		//}
-		//for(int i = 0; i < tankSpawner.TAList.Count; i++)
-  //      {
-		//	tankSpawner.TAList[i].MinNum = enemyList[i];
+            enemyList[i] = 0;
 
-		//}
-		//if (TATank.MinNum == -1 && tankSpawner.TAList.Count != 0) TATank.MinNum = TATank.TAEnemydir.First().Value.TankNum;
-	}
+        }
+        TATankCenter = TATankCenter / aliveNum;
 
-	//判断某个对手是否存在于敌人列表
-	bool judgeEnemyExist(SortedDictionary<float, TankControl> enemyDir, TankControl judgeEnemy)
+        //给对手距离己方中心点排序
+        SortEnemyDis.Clear();
+        foreach (var enemy in tankSpawner.Biolist)
+        {
+            if (!enemy.Isdead)
+            {
+                float dis = baseFunction.CalculateDisX0Z(enemy.transform.position, TATankCenter);
+                SortEnemyDis.TryAdd(dis, enemy);
+            }
+
+        }
+
+        //分配距离中心点最近的对手
+        for (int i = 0; i < SortEnemyDis.Count; i++)
+        {
+            BioSameEnemyDir.Clear();
+            foreach (var tank in tankSpawner.TAList)
+            {
+                if (!tank.assignFlag && !tank.Isdead)
+                {
+                    float dis = baseFunction.CalculateDisX0Z(tank.transform.position, SortEnemyDis.ElementAt(i).Value.transform.position);
+                    BioSameEnemyDir.TryAdd(dis, tank);
+                }
+
+            }
+            foreach (var tank in tankSpawner.TAList)
+            {
+                if (!tank.assignFlag && !tank.Isdead && tank.TankNum == BioSameEnemyDir.First().Value.TankNum)
+                {
+                    enemyList[tank.TankNum] = SortEnemyDis.ElementAt(i).Value.TankNum;
+                    tank.assignFlag = true;
+                }
+            }
+        }
+
+        foreach (var tank in tankSpawner.TAList)
+        {
+            if (enemyList[tank.TankNum] == 0 && !tank.Isdead && tank.TAEnemydir.Count != 0) enemyList[tank.TankNum] = tank.TAEnemydir.First().Value.TankNum;
+        }
+    }
+
+    //判断某个对手是否存在于敌人列表
+    bool judgeEnemyExist(SortedDictionary<float, TankControl> enemyDir, TankControl judgeEnemy)
 	{
 		foreach (var enemy in enemyDir.Values)
 		{
@@ -261,6 +319,7 @@ public class EnemyJudge : MonoBehaviour
 		}
 
 		man.ResultMinNum = tankSpawner.useTA ? man.BioEnemydirTA.ElementAt(index).Value.TankNum : man.BioEnemydir.ElementAt(index).Value.TankNum;
+		//man.ResultMinNum = 2;
 		man.BioSameEnemyDir.Clear();
 		for (int i = 0; i < TeamNum; i++)
 		{
@@ -282,6 +341,7 @@ public class EnemyJudge : MonoBehaviour
 				break;
 			}
 		}
+		//UnityEngine.Debug.Log(man.TankNum + " ：" + enemyCount);
 		if (enemyCount < 2)
 		{
 			return man.ResultMinNum;

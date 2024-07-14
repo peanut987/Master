@@ -157,6 +157,7 @@ public class TankControl : Agent
     public Material Black;
     public Color SliderBlack;
     public ManControl enemY;
+    public bool isRuleModle = false;
 
     public enum RewardType
     {
@@ -837,10 +838,39 @@ public class TankControl : Agent
         }
         else
         {
-            vv = continuousActions[0] * MaxSpeed;
-            rv = continuousActions[1] * rotatespeed;
-            move(continuousActions[0] * MaxSpeed, continuousActions[1] * rotatespeed, 0); //continuousActions[3] * rotatespeed
-            OpenFire(continuousActions[2] * MaxFireAngle, discreteActions[0]);
+            if (isRuleModle)
+            {
+                if (EnemyBiodir.Count != 0)
+                {
+                    vv = continuousActions[0] * MaxSpeed;
+                    rv = continuousActions[1] * rotatespeed;
+                    if (continuousActions[0] != 0)
+                    {
+                        if (continuousActions[0] <= -0.5f)
+                            backTargetEnemy(EnemyBiodir);
+                        else if ((continuousActions[0] > -0.5f) && (continuousActions[0] < 0.0f))
+                            Concentrate();
+                        else if ((continuousActions[0] > 0.0f) && (continuousActions[0] < 0.5f))
+                            moveTargetEnemy(EnemyBiodir);
+                        else
+                            CacAvoidDir(EnemyBiodir);
+                    }
+
+                    if (continuousActions[1] > 0.5f)
+                    {
+                        openFireEnemy(EnemyBiodir);
+                    }
+                }
+            }
+            else
+            {
+                vv = continuousActions[0] * MaxSpeed;
+                rv = continuousActions[1] * rotatespeed;
+                move(continuousActions[0] * MaxSpeed, continuousActions[1] * rotatespeed, 0); //continuousActions[3] * rotatespeed
+                OpenFire(continuousActions[2] * MaxFireAngle, discreteActions[0]);
+
+            }
+
             //OpenFire(continuousActions[2], discreteActions[0]);
         }
         //每一帧都扣固定的伤害
@@ -1313,6 +1343,126 @@ public class TankControl : Agent
 
     }
 
+
+    //规则部分
+    //朝敌人移动
+    void moveTargetEnemy(SortedDictionary<float, ManControl> EnemyBiodir)
+    {
+        if (EnemyBiodir.Count != 0)
+        {
+            Vector3 moveTarget = EnemyBiodir.First().Value.transform.position - transform.position;
+            float t = 0.0f;
+            t = Mathf.Clamp01(t + (Time.deltaTime * 1.0f));
+            //坦克动作执行代码，转向由Slerp函数执行，前进由man.move函数执行
+            //Quaternion targetRotation1 = Quaternion.LookRotation(man.TowerDir);
+            //man.Tower.transform.rotation = Quaternion.Lerp(man.Tower.rotation, targetRotation1, t1);
+
+            Quaternion targetRotation = Quaternion.LookRotation(moveTarget);
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, t);
+            move(MaxSpeed, 0, 0);
+        }
+    }
+
+    //后撤
+    void backTargetEnemy(SortedDictionary<float, ManControl> EnemyBiodir)
+    {
+        Vector3 moveTarget = EnemyBiodir.First().Value.transform.position - transform.position;
+        Vector3 direction = Quaternion.Euler(0f, 225, 0f) * moveTarget.normalized;
+        float t = 0.0f;
+        t = Mathf.Clamp01(t + (Time.deltaTime * 1.0f));
+        //坦克动作执行代码，转向由Slerp函数执行，前进由man.move函数执行
+        //Quaternion targetRotation1 = Quaternion.LookRotation(man.TowerDir);
+        //man.Tower.transform.rotation = Quaternion.Lerp(man.Tower.rotation, targetRotation1, t1);
+        UnityEngine.Debug.Log("back");
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, t);
+        move(MaxSpeed, 0, 0);
+        //if (moveTarget.magnitude < 200.0f)
+        //    move(-MaxSpeed, 0, 0);
+    }
+
+    //避障
+    void CacAvoidDir(SortedDictionary<float, ManControl> EnemyBiodir)
+    {
+        Vector3 TeamMateDir = Vector3.zero, MoveDir1 = Vector3.zero;
+        Vector3 moveTarget = EnemyBiodir.First().Value.transform.position - transform.position;
+        float t = 0.0f;
+        t = Mathf.Clamp01(t + (Time.deltaTime * 1.0f));
+        //坦克动作执行代码，转向由Slerp函数执行，前进由man.move函数执行
+        for (int i = 0; i < tankSpawner.BlueAgentsList.Count; i++)
+        {
+            float TeamMateDis = Vector3.Distance(transform.position, tankSpawner.BlueAgentsList[i].transform.position);
+            //if (man.TankNum == 7) print(TeamMateDis);
+            if ((TeamMateDis < 50) && TeamMateDis != 0.0f)
+            {
+                TeamMateDir = (transform.position - tankSpawner.BlueAgentsList[i].transform.position).normalized /
+                        Vector3.Distance(transform.position, tankSpawner.BlueAgentsList[i].transform.position);
+            }
+            else
+            {
+
+                TeamMateDir = Vector3.zero;
+            }
+
+            MoveDir1 += TeamMateDir;
+        }
+
+        moveTarget = (MoveDir1 + moveTarget / moveTarget.magnitude).normalized;
+
+        Quaternion targetRotation = Quaternion.LookRotation(moveTarget);
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, t);
+        move(MaxSpeed, 0, 0);
+    }
+
+    //发炮
+    void openFireEnemy(SortedDictionary<float, ManControl> EnemyBiodir)
+    {
+        Vector3 target = EnemyBiodir.First().Value.transform.position;
+        Vector3 TowerDir = (target - transform.position).normalized;
+        Vector3 cannonDir = cannon.forward;
+
+        cannonDir = new Vector3(cannonDir.x, 0, cannonDir.z);
+        TowerDir = new Vector3(TowerDir.x, 0, TowerDir.z);
+
+        float angle = Vector3.SignedAngle(TowerDir, cannonDir, Vector3.up);//左正右负
+
+        if (angle > 0.1) Tower.Rotate(-Vector3.up, 0.6f);
+        else if (angle < -0.1f) Tower.Rotate(Vector3.up, 0.6f);
+
+        OpenFire(angle, 1);
+    }
+
+    //凝聚
+    void Concentrate()
+    {
+        Vector3 moveTarget = CalculateCnter(tankSpawner.BlueAgentsList);
+        float t = 0.0f;
+        t = Mathf.Clamp01(t + (Time.deltaTime * 1.0f));
+        //坦克动作执行代码，转向由Slerp函数执行，前进由man.move函数执行
+        //Quaternion targetRotation1 = Quaternion.LookRotation(man.TowerDir);
+        //man.Tower.transform.rotation = Quaternion.Lerp(man.Tower.rotation, targetRotation1, t1);
+
+        Quaternion targetRotation = Quaternion.LookRotation(moveTarget);
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, t);
+        move(MaxSpeed, 0, 0);
+    }
+
+    //计算队伍存活个体的中心位置
+    public Vector3 CalculateCnter(List<TankControl> tank)
+    {
+        Vector3 teamCenterPos = Vector3.zero;
+        int aliveCount = 0;
+        foreach (var it in tank)
+        {
+            if (!it.Isdead)
+            {
+                teamCenterPos += it.transform.position;
+                aliveCount++;
+
+            }
+        }
+        return teamCenterPos / aliveCount;
+    }
 
 }
 

@@ -102,7 +102,9 @@ public class GameManage : MonoBehaviour
     private Dictionary<int, List<float>> agentRewards = new();
     private Transform Text;
     private float[] TextScale = { 1.5f, 1, 3.5f, 1, 2 };//保存地图对应的文本生成大小
-    
+
+
+    public int CalcDistanceTime = 0;
     public float Righttime = 30;//用于计时
     public int limitWaitTime = 500;//对局结束后延时时间，便于观察胜负
     public bool is_training = true;
@@ -158,7 +160,7 @@ public class GameManage : MonoBehaviour
 
         m_BlueAgentGroup = new SimpleMultiAgentGroup();
         m_RedAgentGroup = new SimpleMultiAgentGroup();
-        //tankSpawner.SpawnTanks();
+        tankSpawner.SpawnTanks();
         left_Step = MaxEnvironmentSteps;
         //初始化丘陵地区的高处坐标
         Transform BornPoint = GameObject.Find("blue").transform;
@@ -180,7 +182,7 @@ public class GameManage : MonoBehaviour
         UpdateTitle(SUM_RED, SUM_BLUE);
         //UnityEngine.Debug.Log("game tankSpawner.Biolist" + tankSpawner.Biolist.Count);
         //InitMapData();
-        //setTimeScale(SUM_RED, SUM_BLUE);
+        setTimeScale(SUM_RED, SUM_BLUE);
         ResetScene();
 
     }
@@ -237,44 +239,52 @@ public class GameManage : MonoBehaviour
             ResetScene();
         }
 
-        if (!GameObject.Find("TankSpawner").GetComponent<TankSpawner>().useBio)
+
+        CalcDistanceTime++;
+        //计算敌军距离，并添加
+        if (CalcDistanceTime > 0)
         {
-            foreach (var item in tankSpawner.AgentsList)
+            CalcDistanceTime = 0;
+            //统计两个队伍奖励值，以及清理敌方列表
+            if (!GameObject.Find("TankSpawner").GetComponent<TankSpawner>().useBio)
             {
-                if (item.tankTeam == TankTeam.Tank_Red)
-                    RedScore += item.GetCumulativeReward();
-                else
+                foreach (var item in tankSpawner.AgentsList)
+                {
+                    if (item.tankTeam == TankTeam.Tank_Red)
+                        RedScore += item.GetCumulativeReward();
+                    else
+                        BlueScore += item.GetCumulativeReward();
+
+                    item.Enemydir.Clear();
+                    item.Enemydir1.Clear();
+                }
+            }
+            else
+            {
+                foreach (var item in tankSpawner.BlueAgentsList)
+                {
+
                     BlueScore += item.GetCumulativeReward();
+                    item.EnemyBiodir.Clear();
+                    item.EnemyBiodir1.Clear();
+                }
 
-                item.Enemydir.Clear();
-                item.Enemydir1.Clear();
+                foreach (var item in tankSpawner.Biolist)
+                {
+                    item.BioEnemydir.Clear();
+                    item.BioEnemydir1.Clear();
+
+                    item.BioEnemydirTA.Clear();
+                }
+
+                foreach (var item in tankSpawner.TAList)
+                {
+                    item.TAEnemydir.Clear();
+                    item.BioEnemydir1.Clear();
+                }
             }
+            CalcDistance();
         }
-        else
-        {
-            foreach (var item in tankSpawner.BlueAgentsList)
-            {
-
-                BlueScore += item.GetCumulativeReward();
-                item.EnemyBiodir.Clear();
-                item.EnemyBiodir1.Clear();
-            }
-
-            foreach (var item in tankSpawner.Biolist)
-            {
-                item.BioEnemydir.Clear();
-                item.BioEnemydir1.Clear();
-
-                item.BioEnemydirTA.Clear();
-            }
-
-            foreach (var item in tankSpawner.TAList)
-            {
-                item.TAEnemydir.Clear();
-                item.BioEnemydir1.Clear();
-            }
-        }
-        CalcDistance();
 
 
         UpdateText();
@@ -455,7 +465,7 @@ public class GameManage : MonoBehaviour
                         item.Isdead = false;
                         item.gameObject.SetActive(true);
                     }
-                    item.transform.position = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[0];
+                    item.transform.position = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue, 20, 20)[0];
                     item.transform.forward = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[1];
                 }
 
@@ -521,7 +531,7 @@ public class GameManage : MonoBehaviour
                         item.Isdead = false;
                         item.gameObject.SetActive(true);
                     }
-                    item.transform.position = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[0];
+                    item.transform.position = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue, 20, 20)[0];
                     item.transform.forward = setPosition(round, item.TankNum, item.tankTeam, isChangePosition, BornPointRed, BornPointBlue)[1];
 
                     //初始化血量
@@ -571,8 +581,16 @@ public class GameManage : MonoBehaviour
 
     public void setTimeScale(int redNum, int blueNum)
     {
-        if (redNum == 5 && blueNum == 5) Time.timeScale = 15;
-        else Time.timeScale = 15;
+        if (TranningSetting.algorithmSelect.NRStandard && !TranningSetting.algorithmSelect.RLStandard)
+        {
+            if (redNum == 5 && blueNum == 5) Time.timeScale = 5;
+            else Time.timeScale = 2.5f;
+        }
+        else
+        {
+            Time.timeScale = 3;
+        }
+
     }
 
     public void RecordMode()
@@ -906,8 +924,7 @@ public class GameManage : MonoBehaviour
     //计算智能体之间距离
     void CalcDistance()
     {
-        float distance1;
-
+        float distance1 = 0.0f, Matedistance = 0.0f, viewdistance = 1200.0f, TeammateDistance = 600.0f, allViewDistance = 600.0f;
         //先更新蓝方对手列表
 
         if (!GameObject.Find("TankSpawner").GetComponent<TankSpawner>().useBio)
@@ -960,10 +977,27 @@ public class GameManage : MonoBehaviour
                     {
                         if (!blue.Isdead)
                         {
+                            RaycastHit Enemyhit;
+                            bool JudgeEnemy = false;
                             Vector3 direction1 = new Vector3(red.transform.position.x, red.transform.position.y + 2, red.transform.position.z) -
                                 new Vector3(blue.transform.position.x, blue.transform.position.y + 2, blue.transform.position.z);
                             distance1 = direction1.magnitude;
-                            blue.EnemyBiodir.TryAdd(distance1, red);
+
+                            if (distance1 <= viewdistance) // 判断距离是否在150以内
+                            {
+                                if (Physics.Raycast(new Vector3(blue.transform.position.x, blue.transform.position.y + 2, blue.transform.position.z), direction1.normalized, out Enemyhit, distance1)) // 射线检测是否有障碍物
+                                {
+                                    if (Enemyhit.collider != null && Enemyhit.collider.tag == "Tank_Red") // 判断射线撞击的是否是蓝色坦克
+                                    {
+                                        JudgeEnemy = true;
+                                    }
+                                }
+                            }
+
+                            if (JudgeEnemy || distance1 <= allViewDistance)
+                            {
+                                blue.EnemyBiodir.TryAdd(distance1, red);
+                            }
                         }
                     }
                 }
@@ -977,10 +1011,28 @@ public class GameManage : MonoBehaviour
                     {
                         if (!red.Isdead)
                         {
+                            RaycastHit Enemyhit;
+                            bool JudgeEnemy = false;
                             Vector3 direction1 = new Vector3(blue.transform.position.x, blue.transform.position.y + 2, blue.transform.position.z) -
                                 new Vector3(red.transform.position.x, red.transform.position.y + 2, red.transform.position.z);
                             distance1 = direction1.magnitude;
-                            red.BioEnemydir.TryAdd(distance1, blue);
+                            //red.BioEnemydirTA.TryAdd(distance1, blue);
+
+                            if (distance1 <= viewdistance) // 判断距离是否在150以内
+                            {
+                                if (Physics.Raycast(new Vector3(red.transform.position.x, red.transform.position.y + 2, red.transform.position.z), direction1.normalized, out Enemyhit, distance1)) // 射线检测是否有障碍物
+                                {
+                                    if (Enemyhit.collider != null && Enemyhit.collider.tag == "Tank_Blue") // 判断射线撞击的是否是蓝色坦克
+                                    {
+                                        JudgeEnemy = true;
+                                    }
+                                }
+                            }
+
+                            if (JudgeEnemy || distance1 <= allViewDistance)
+                            {
+                                red.BioEnemydir.TryAdd(distance1, blue);
+                            }
 
                         }
                     }
@@ -997,10 +1049,27 @@ public class GameManage : MonoBehaviour
                     {
                         if (!blue.Isdead)
                         {
+                            RaycastHit Enemyhit;
+                            bool JudgeEnemy = false;
                             Vector3 direction1 = new Vector3(red.transform.position.x, red.transform.position.y + 2, red.transform.position.z) -
                                 new Vector3(blue.transform.position.x, blue.transform.position.y + 2, blue.transform.position.z);
                             distance1 = direction1.magnitude;
-                            blue.TAEnemydir.TryAdd(distance1, red);
+
+                            if (distance1 <= viewdistance) // 判断距离是否在150以内
+                            {
+                                if (Physics.Raycast(new Vector3(blue.transform.position.x, blue.transform.position.y + 2, blue.transform.position.z), direction1.normalized, out Enemyhit, distance1)) // 射线检测是否有障碍物
+                                {
+                                    if (Enemyhit.collider != null && Enemyhit.collider.tag == "Tank_Red") // 判断射线撞击的是否是蓝色坦克
+                                    {
+                                        JudgeEnemy = true;
+                                    }
+                                }
+                            }
+
+                            if (JudgeEnemy || distance1 <= allViewDistance)
+                            {
+                                blue.TAEnemydir.TryAdd(distance1, red);
+                            }
                         }
                     }
                 }
@@ -1014,13 +1083,32 @@ public class GameManage : MonoBehaviour
                     {
                         if (!red.Isdead)
                         {
+                            RaycastHit Enemyhit;
+                            bool JudgeEnemy = false;
                             Vector3 direction1 = new Vector3(blue.transform.position.x, blue.transform.position.y + 2, blue.transform.position.z) -
                                 new Vector3(red.transform.position.x, red.transform.position.y + 2, red.transform.position.z);
                             distance1 = direction1.magnitude;
-                            red.BioEnemydirTA.TryAdd(distance1, blue);
+                            //red.BioEnemydirTA.TryAdd(distance1, blue);
 
+                            if (distance1 <= viewdistance) // 判断距离是否在150以内
+                            {
+                                if (Physics.Raycast(new Vector3(red.transform.position.x, red.transform.position.y + 2, red.transform.position.z), direction1.normalized, out Enemyhit, distance1)) // 射线检测是否有障碍物
+                                {
+                                    if (Enemyhit.collider != null && Enemyhit.collider.tag == "Tank_Blue") // 判断射线撞击的是否是蓝色坦克
+                                    {
+                                        JudgeEnemy = true;
+                                    }
+                                }
+                            }
+
+                            if (JudgeEnemy || distance1 <= allViewDistance)
+                            {
+                                red.BioEnemydirTA.TryAdd(distance1, blue);
+                            }
                         }
+
                     }
+
                 }
             }
         }

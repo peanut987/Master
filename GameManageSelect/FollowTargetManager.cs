@@ -74,7 +74,7 @@ public class FollowTargetManager : MonoBehaviour
     {
         if (Bio <= 4)
         {
-            if(Bio == 3)
+            if (Bio == 3)
             {
                 // 查找要删除的 GameObject（通过名称或其他方式）
                 Camera cameraToDelete = GameObject.Find("Bio4").GetComponent<Camera>();
@@ -99,7 +99,7 @@ public class FollowTargetManager : MonoBehaviour
 
         if (RL <= 4)
         {
-            if(RL == 3)
+            if (RL == 3)
             {
                 // 查找要删除的 GameObject（通过名称或其他方式）
                 Camera cameraToDelete = GameObject.Find("RL4").GetComponent<Camera>();
