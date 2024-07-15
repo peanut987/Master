@@ -37,7 +37,7 @@ public class Cannon : MonoBehaviour
 		{
 			cannon_line.startWidth = 0.5f;
 			cannon_line.endWidth = 0.5f;
-			castDis = 1250.0f;
+			castDis = 150.0f;
 		}
 		setRadius(manControl.trainingSetting.RedTeam.nums, manControl.trainingSetting.BlueTeam.nums, tankSpawner.useTA, manControl.trainingSetting.algorithmSelect.BioOptimized);
 		ColliderFlag = false;

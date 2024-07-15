@@ -46,7 +46,7 @@ public class Tower_Rl : MonoBehaviour
         }
         else
         {
-            if (tankControl.Enemy_len != 0 && tankControl.Isdead == false)
+            if (tankControl.EnemyBiodir.Count != 0 && tankControl.Isdead == false)
             {
                 ManControl enemY = tankControl.EnemyBiodir.First().Value;
                 Vector3 target = enemY.transform.position;

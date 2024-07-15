@@ -57,8 +57,8 @@ public class Rl_Cannon : MonoBehaviour
 			cannon_line.SetPosition(1, hit.point);
 			Vector3 hitPointXOZ = new Vector3(hit.point.x, tankControl.transform.position.y, hit.point.z);*/
 			// 如果射线碰撞到物体，绘制从起点到碰撞点的线段
-			cannon_line.SetPosition(0, start);
-			cannon_line.SetPosition(1, hit.point);
+			//cannon_line.SetPosition(0, start);
+			//cannon_line.SetPosition(1, hit.point);
 			Vector3 hitPointXOZ = new Vector3(hit.point.x, tankControl.transform.position.y, hit.point.z);
 			Vector3 target = (tankControl.EnemyBiodir.Count != 0) ? tankControl.EnemyBiodir.First().Value.transform.position : Vector3.zero;
 

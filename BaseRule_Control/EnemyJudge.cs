@@ -40,8 +40,10 @@ public class EnemyJudge : MonoBehaviour
 
     private void FixedUpdate()
     {
-		AN_Enemy();
-
+		if(trainingSetting.algorithmSelect.NRStandard && !trainingSetting.algorithmSelect.CBAAStandard)
+			AN_Enemy();
+		else if (!trainingSetting.algorithmSelect.NRStandard && trainingSetting.algorithmSelect.CBAAStandard)
+			assignEnemy(tankSpawner.TAList);
 	}
     //敌军判断
     public void Judge(ManControl man)
@@ -164,76 +166,138 @@ public class EnemyJudge : MonoBehaviour
 
 	}
 
-    //public void AN_Enemy_View(ManControl TATank)
-    //{
-    //	//求己方中心点
-    //	TATank.TATankCenter = Vector3.zero;
-    //	TATank.MinNum = -1;
-    //	TATank.assignFlag = false;
-    //	int aliveNum = 0;
+	//public void AN_Enemy_View(ManControl TATank)
+	//{
+	//	//求己方中心点
+	//	TATank.TATankCenter = Vector3.zero;
+	//	TATank.MinNum = -1;
+	//	TATank.assignFlag = false;
+	//	int aliveNum = 0;
 
-    //	foreach (var tank in tankSpawner.TAList)
-    //	{
-    //		if (!tank.Isdead)
-    //		{
-    //			aliveNum++;
-    //			TATank.TATankCenter += tank.transform.position;
-    //		}
+	//	foreach (var tank in tankSpawner.TAList)
+	//	{
+	//		if (!tank.Isdead)
+	//		{
+	//			aliveNum++;
+	//			TATank.TATankCenter += tank.transform.position;
+	//		}
 
-    //	}
-    //	for (int i = 0; i < tankSpawner.TAList.Count; i++)
-    //	{
-    //		TATank.enemyList[i] = 0;
+	//	}
+	//	for (int i = 0; i < tankSpawner.TAList.Count; i++)
+	//	{
+	//		TATank.enemyList[i] = 0;
 
-    //	}
-    //	TATank.TATankCenter = TATank.TATankCenter / aliveNum;
+	//	}
+	//	TATank.TATankCenter = TATank.TATankCenter / aliveNum;
 
-    //	//给对手距离己方中心点排序
-    //	TATank.SortEnemyDis.Clear();
-    //	foreach (var enemy in TATank.TAEnemydir.Values)
-    //	{
-    //		if (!enemy.Isdead)
-    //		{
-    //			float dis = baseFunction.CalculateDisX0Z(enemy.transform.position, TATank.TATankCenter);
-    //			TATank.SortEnemyDis.TryAdd(dis, enemy);
-    //		}
+	//	//给对手距离己方中心点排序
+	//	TATank.SortEnemyDis.Clear();
+	//	foreach (var enemy in TATank.TAEnemydir.Values)
+	//	{
+	//		if (!enemy.Isdead)
+	//		{
+	//			float dis = baseFunction.CalculateDisX0Z(enemy.transform.position, TATank.TATankCenter);
+	//			TATank.SortEnemyDis.TryAdd(dis, enemy);
+	//		}
 
-    //	}
+	//	}
 
-    //	//分配距离中心点最近的对手
-    //	for (int i = 0; i < TATank.SortEnemyDis.Count; i++)
-    //	{
-    //		TATank.TASameEnemyDir.Clear();
-    //		foreach (var tank in tankSpawner.TAList)
-    //		{
-    //			if (!tank.assignFlag && !tank.Isdead && tank.TAEnemydir.Values.Contains(TATank.SortEnemyDis.ElementAt(i).Value))
-    //			{
-    //				float dis = baseFunction.CalculateDisX0Z(tank.transform.position, TATank.SortEnemyDis.ElementAt(i).Value.transform.position);
-    //				TATank.TASameEnemyDir.TryAdd(dis, tank);
-    //			}
+	//	//分配距离中心点最近的对手
+	//	for (int i = 0; i < TATank.SortEnemyDis.Count; i++)
+	//	{
+	//		TATank.TASameEnemyDir.Clear();
+	//		foreach (var tank in tankSpawner.TAList)
+	//		{
+	//			if (!tank.assignFlag && !tank.Isdead && tank.TAEnemydir.Values.Contains(TATank.SortEnemyDis.ElementAt(i).Value))
+	//			{
+	//				float dis = baseFunction.CalculateDisX0Z(tank.transform.position, TATank.SortEnemyDis.ElementAt(i).Value.transform.position);
+	//				TATank.TASameEnemyDir.TryAdd(dis, tank);
+	//			}
 
-    //		}
+	//		}
 
-    //		if(TATank.TankNum == TATank.TASameEnemyDir.First().Value.TankNum )
-    //           {
-    //			TATank.MinNum = TATank.SortEnemyDis.ElementAt(i).Value.TankNum;
-    //			TATank.assignFlag = true;
-    //			break;
-    //           }
-    //		//foreach (var tank in tankSpawner.TAList)
-    //		//{
-    //		//	if (!tank.assignFlag && !tank.Isdead && tank.TankNum == BioSameEnemyDir.First().Value.TankNum)
-    //		//	{
-    //		//		enemyList[tank.TankNum] = SortEnemyDis.ElementAt(i).Value.TankNum;
-    //		//		tank.assignFlag = true;
-    //		//	}
-    //		//}
-    //	}
+	//		if(TATank.TankNum == TATank.TASameEnemyDir.First().Value.TankNum )
+	//           {
+	//			TATank.MinNum = TATank.SortEnemyDis.ElementAt(i).Value.TankNum;
+	//			TATank.assignFlag = true;
+	//			break;
+	//           }
+	//		//foreach (var tank in tankSpawner.TAList)
+	//		//{
+	//		//	if (!tank.assignFlag && !tank.Isdead && tank.TankNum == BioSameEnemyDir.First().Value.TankNum)
+	//		//	{
+	//		//		enemyList[tank.TankNum] = SortEnemyDis.ElementAt(i).Value.TankNum;
+	//		//		tank.assignFlag = true;
+	//		//	}
+	//		//}
+	//	}
 
-    //	if(TATank.MinNum == -1 && !TATank.Isdead && TATank.TAEnemydir.Count != 0) TATank.MinNum = TATank.TAEnemydir.First().Value.TankNum;
-    //}
+	//	if(TATank.MinNum == -1 && !TATank.Isdead && TATank.TAEnemydir.Count != 0) TATank.MinNum = TATank.TAEnemydir.First().Value.TankNum;
+	//}
 
-    public void AN_Enemy()
+	//CBAA
+	public void assignEnemy(List<ManControl> list)
+	{
+		float maxValue = 0;
+		string assign = "";
+		for (int a = 0; a < list.Count; a++)
+		{
+			float temp0 = list[0].superiority_factor[a];
+			for (int b = 0; b < list.Count; b++)
+			{
+				if (a == b)
+					continue;
+				float temp1 = list[1].superiority_factor[b];
+				for (int c = 0; c < list.Count; c++)
+				{
+					if (a == c || b == c)
+						continue;
+					float temp2 = list[1].superiority_factor[c];
+					for (int d = 0; d < list.Count; d++)
+					{
+						if (a == d || b == d || d == c)
+							continue;
+						float temp3 = list[1].superiority_factor[d];
+						for (int e = 0; e < list.Count; e++)
+						{
+							if (a == e || b == e || e == c || e == d)
+								continue;
+							float temp4 = list[1].superiority_factor[e];
+							float temp = temp0 + temp1 + temp2 + temp3 + temp4;
+							if (maxValue < temp)
+							{
+								maxValue = temp;
+								assign = a + "" + b + "" + c + "" + d + "" + e;
+							}
+						}
+					}
+				}
+			}
+		}
+		if (assign.Length == 5)
+		{
+			for (int i = 0; i < list.Count; i++)
+			{
+				list[i].finalNum = assign[i] - '0';
+				if (list[i].superiority_factor[assign[i] - '0'] == 0)
+				{
+					for (int j = 0; j < list.Count; j++)
+					{
+						if (list[i].superiority_factor[j] != 0)
+						{
+							list[i].finalNum = j;
+							break;
+						}
+					}
+				}
+				//Debug.Log("info0: " + list[i].finalNum + list[i].name);
+			}
+			//Debug.Log("info: "+ maxValue + " " + assign);
+		}
+	}
+
+	//AN
+	public void AN_Enemy()
     {
         //求己方中心点
         TATankCenter = Vector3.zero;

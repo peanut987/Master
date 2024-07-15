@@ -251,6 +251,15 @@ public class TankControl : Agent
         {
             Enemy_len = Enemydir.Count;
         }
+        if (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= 27)
+        {
+            _rigidbody.AddForce(Vector3.down * 2000000f, ForceMode.Impulse);
+        }
+        else if (GameObject.Find("NVN").GetComponent<GameManage>().Righttime < 27 && GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= 25)
+        {
+            move(MaxSpeed, 0, 0);
+        }
+        //TankGround();
     }
 
     //手动控制代码
@@ -422,13 +431,25 @@ public class TankControl : Agent
 
     }
 
+    void TankGround()
+    {
+        int Rmask = LayerMask.GetMask("GroundLayer");
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, 180.0f, Rmask))  //&& (baseFunction.angleOffset(angle.x) > -5 || baseFunction.angleOffset(angle.x) < -35))
+        {
+            if (Vector3.Distance(transform.position, hit.point) > 5.0f)
+            {
+                _rigidbody.AddForce(Vector3.down * 2000000f, ForceMode.Impulse);
+            }
+        }
+    }
+
     //移动控制
     public void move(float v_value, float h_value, float tower_rotate)
     {
 
         if (GameObject.Find("NVN").GetComponent<GameManage>().Righttime >= 27)
         {
-            _rigidbody.AddForce(Vector3.down * 200000f, ForceMode.Impulse);
+            _rigidbody.AddForce(Vector3.down * 20000000f, ForceMode.Impulse);
         }
         if (Isdead || (gameManage.round > 100 && !trainingSetting.EnvInfo.isTrainning))
         {
@@ -455,6 +476,7 @@ public class TankControl : Agent
             if (Vector3.Distance(transform.position, hit.point) > 0.5f)
             {
                 _rigidbody.AddForce(Vector3.down * 200000f, ForceMode.Impulse);
+                //UnityEngine.Debug.Log(TankNum + " :" + Vector3.Distance(transform.position, hit.point));
             }
 
         }
@@ -840,23 +862,28 @@ public class TankControl : Agent
         {
             if (isRuleModle)
             {
+                vv = continuousActions[0] * MaxSpeed;
+                rv = continuousActions[1] * rotatespeed;
+                if (continuousActions[0] != 0)
+                {
+                    if (continuousActions[0] < 0.0f)
+                        backTargetEnemy(EnemyBiodir);
+                    else if (continuousActions[0] > 0.0f)
+                        Concentrate();
+                }
+
+                if (continuousActions[1] != 0)
+                {
+                    if (continuousActions[1] < 0.0f)
+                        moveTargetEnemy(EnemyBiodir);
+                    else
+                        CacAvoidDir(EnemyBiodir);
+                }
+
+
                 if (EnemyBiodir.Count != 0)
                 {
-                    vv = continuousActions[0] * MaxSpeed;
-                    rv = continuousActions[1] * rotatespeed;
-                    if (continuousActions[0] != 0)
-                    {
-                        if (continuousActions[0] <= -0.5f)
-                            backTargetEnemy(EnemyBiodir);
-                        else if ((continuousActions[0] > -0.5f) && (continuousActions[0] < 0.0f))
-                            Concentrate();
-                        else if ((continuousActions[0] > 0.0f) && (continuousActions[0] < 0.5f))
-                            moveTargetEnemy(EnemyBiodir);
-                        else
-                            CacAvoidDir(EnemyBiodir);
-                    }
-
-                    if (continuousActions[1] > 0.5f)
+                    if (continuousActions[2] > 0.0f)
                     {
                         openFireEnemy(EnemyBiodir);
                     }
@@ -867,7 +894,7 @@ public class TankControl : Agent
                 vv = continuousActions[0] * MaxSpeed;
                 rv = continuousActions[1] * rotatespeed;
                 move(continuousActions[0] * MaxSpeed, continuousActions[1] * rotatespeed, 0); //continuousActions[3] * rotatespeed
-                OpenFire(continuousActions[2] * MaxFireAngle, discreteActions[0]);
+                if(EnemyBiodir.Count != 0) OpenFire(continuousActions[2] * MaxFireAngle, discreteActions[0]);
 
             }
 
@@ -1350,7 +1377,7 @@ public class TankControl : Agent
     {
         if (EnemyBiodir.Count != 0)
         {
-            Vector3 moveTarget = EnemyBiodir.First().Value.transform.position - transform.position;
+            Vector3 moveTarget = (EnemyBiodir.Count != 0 ? EnemyBiodir.First().Value.transform.position : new Vector3(139.653137f, 5.54664707f, 606.299988f)) - transform.position;
             float t = 0.0f;
             t = Mathf.Clamp01(t + (Time.deltaTime * 1.0f));
             //坦克动作执行代码，转向由Slerp函数执行，前进由man.move函数执行
@@ -1363,10 +1390,25 @@ public class TankControl : Agent
         }
     }
 
+    //朝敌人移动
+    void moveToCenter()
+    {
+        Vector3 moveTarget = new Vector3(139.653137f, 5.54664707f, 606.299988f);
+        float t = 0.0f;
+        t = Mathf.Clamp01(t + (Time.deltaTime * 1.0f));
+        //坦克动作执行代码，转向由Slerp函数执行，前进由man.move函数执行
+        //Quaternion targetRotation1 = Quaternion.LookRotation(man.TowerDir);
+        //man.Tower.transform.rotation = Quaternion.Lerp(man.Tower.rotation, targetRotation1, t1);
+
+        Quaternion targetRotation = Quaternion.LookRotation(moveTarget);
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, t);
+        move(MaxSpeed, 0, 0);
+    }
+
     //后撤
     void backTargetEnemy(SortedDictionary<float, ManControl> EnemyBiodir)
     {
-        Vector3 moveTarget = EnemyBiodir.First().Value.transform.position - transform.position;
+        Vector3 moveTarget = (EnemyBiodir.Count != 0 ? EnemyBiodir.First().Value.transform.position : new Vector3(139.653137f, 5.54664707f, 606.299988f)) - transform.position;
         Vector3 direction = Quaternion.Euler(0f, 225, 0f) * moveTarget.normalized;
         float t = 0.0f;
         t = Mathf.Clamp01(t + (Time.deltaTime * 1.0f));
@@ -1385,7 +1427,7 @@ public class TankControl : Agent
     void CacAvoidDir(SortedDictionary<float, ManControl> EnemyBiodir)
     {
         Vector3 TeamMateDir = Vector3.zero, MoveDir1 = Vector3.zero;
-        Vector3 moveTarget = EnemyBiodir.First().Value.transform.position - transform.position;
+        Vector3 moveTarget = (EnemyBiodir.Count != 0 ? EnemyBiodir.First().Value.transform.position : new Vector3(139.653137f, 5.54664707f, 606.299988f)) - transform.position;
         float t = 0.0f;
         t = Mathf.Clamp01(t + (Time.deltaTime * 1.0f));
         //坦克动作执行代码，转向由Slerp函数执行，前进由man.move函数执行

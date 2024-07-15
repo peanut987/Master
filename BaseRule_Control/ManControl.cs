@@ -119,6 +119,7 @@ public class ManControl : MonoBehaviour
 	public int enemylive;//对手场上存活数量
 	public int teammatelive;//队友场上存活数量
 	public int MinNum;//最终选择攻击的对手ID
+	public int finalNum;//CBAA最终选择攻击的对手ID
 
 	public int LastMinNum;//上一次对手的ID
 	public int ResultMinNum;//通过EnemyJudge()算法判断出的对手ID
@@ -132,6 +133,9 @@ public class ManControl : MonoBehaviour
 	public float[] EnemyDis;//
 	public float[] EnemyRot;
 	public float[] TeamMateDis;//队友距离
+
+	//consensus-based auction algorithm对照算法变量参数
+	public float[] superiority_factor = new float[5];
 
 	[Tooltip("对手与队友字典")]
 	public SortedDictionary<float, TankControl> BioEnemydir = new();
@@ -265,10 +269,22 @@ public class ManControl : MonoBehaviour
 			{
 				if (!trainingSetting.RedTeam.HumanControl)
 				{
-					if (tankTeam == TankTeam.Tank_Red) findEnemy2.Scout(this, transform);
-					else findEnemy2.TAScout(this, transform);
-				}
-				else
+					if (tankTeam == TankTeam.Tank_Red)
+					{
+						findEnemy2.Scout(this, transform);
+					}
+					else
+					{
+						if (trainingSetting.algorithmSelect.NRStandard && !trainingSetting.algorithmSelect.CBAAStandard)
+							findEnemy2.TAScout(this, transform);
+						else if (!trainingSetting.algorithmSelect.NRStandard && trainingSetting.algorithmSelect.CBAAStandard)
+							findEnemy2.CBAAScout(this, transform);
+					}
+                        
+
+                }
+
+                else
 				{
 					ManControlTank();
 				}

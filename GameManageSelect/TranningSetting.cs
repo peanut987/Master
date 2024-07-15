@@ -62,6 +62,9 @@ public class TranningSetting : MonoBehaviour
         [Tooltip("是否选择论文对照就近分配对手算法")]
         public bool NRStandard = false;
 
+        [Tooltip("是否选择论文对照CBAA对手算法")]
+        public bool CBAAStandard = false;
+
         [Tooltip("是否选择论文对照强化学习算法")]
         public bool RLStandard = false;
     }

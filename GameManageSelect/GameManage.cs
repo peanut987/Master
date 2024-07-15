@@ -1029,7 +1029,7 @@ public class GameManage : MonoBehaviour
                                 }
                             }
 
-                            if (JudgeEnemy || distance1 <= allViewDistance)
+                            if (JudgeEnemy || distance1 <= 1500)
                             {
                                 red.BioEnemydir.TryAdd(distance1, blue);
                             }

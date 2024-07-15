@@ -184,11 +184,11 @@ public class ObstacleAvoid : MonoBehaviour
             {
                 if (isOptimized)
                 {
-                    dis[2] = 500;
+                    dis[2] = 300;
                 }
                 else
                 {
-                    dis[2] = 50;
+                    dis[2] = 100;
                 }
             }
         }

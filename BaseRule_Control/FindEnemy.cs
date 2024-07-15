@@ -24,8 +24,6 @@ public class FindEnemy : MonoBehaviour
         obstacleAvoid2 = FindObjectOfType<ObstacleAvoid>();
         trainingSetting = FindObjectOfType<TranningSetting>();
         setDis(trainingSetting.RedTeam.nums, trainingSetting.BlueTeam.nums, tankSpawner.useTA, trainingSetting.algorithmSelect.BioOptimized);
-
-
     }
 
     //后撤距离设置函数，针对不同情况设置不同的后撤距离
@@ -141,32 +139,16 @@ public class FindEnemy : MonoBehaviour
         }
         else
         {
-            AmbushDis = 0;
-            if ((redNum == 3 && blueNum == 4) || (redNum == 4 && blueNum == 3))
+            AmbushDis = 100;
+            if (isOptimized)
             {
-                if (isOptimized)
-                {
-                    BackDistance1 = 300;
-                    BackDistance2 = 300;
-                }
-                else
-                {
-                    BackDistance1 = 100;
-                    BackDistance2 = 100;
-                }
+                BackDistance1 = 300;
+                BackDistance2 = 300;
             }
             else
             {
-                if (isOptimized)
-                {
-                    BackDistance1 = 700;
-                    BackDistance2 = 700;
-                }
-                else
-                {
-                    BackDistance1 = 500;
-                    BackDistance2 = 500;
-                }
+                BackDistance1 = 100;
+                BackDistance2 = 100;
             }
         }
     }
@@ -222,7 +204,7 @@ public class FindEnemy : MonoBehaviour
                 man.relativespeed = 1.0f;
                 man.avoidAngle = 120.0f;
             }
-            target = attackedEnemy.transform.position;
+            target = man.Enemy_len != 0 ? attackedEnemy.transform.position : new Vector3(139.653137f, 5.54664707f, 606.299988f);
         }
         else
         {
@@ -450,6 +432,79 @@ public class FindEnemy : MonoBehaviour
         //if (AllTeamMateDir != Vector3.zero) UnityEngine.Debug.Log(AllTeamMateDir);
         return AllTeamMateDir;
     }
+
+    //consensus-based auction algorithm对照算法
+    public void CBAAScout(ManControl CBAATank, Transform transform)
+    {
+        CBAATank.relativespeed = 1;
+        CBAATank.superiority_factor = new float[tankSpawner.Biolist.Count];
+        for (int i = 0; i < tankSpawner.Biolist.Count; i++)
+        {
+            ManControl biotank = tankSpawner.Biolist[i];
+            if (!biotank.Isdead)
+                CBAATank.superiority_factor[i] = calSuperiorty(biotank, CBAATank);
+            else
+            {
+                CBAATank.superiority_factor[i] = 0;
+            }
+            //if (CBAATank.name == "BlueTeanm4")
+            //{
+            //    Debug.Log(biotank.name + " " + CBAATank.superiority_factor[i]);
+            //}
+        }
+
+        //计算对手的方位
+        var attackedEnemy = tankSpawner.Biolist[CBAATank.finalNum].GetComponent<ManControl>();
+        float[] TempRot = baseFunction2.DotCalculate(CBAATank.cannon, attackedEnemy.transform);
+        CBAATank.Enemyinf[0] = TempRot[0];
+        CBAATank.Enemyinf[1] = baseFunction2.DotCalculate5(CBAATank.cannon, attackedEnemy.transform); //baseFunction.DotCalculate3(transform, tankSpawner.BlueAgentsList[man.MinNum - 1].transform); ;
+        TempRot[1] = baseFunction2.CrossCalculate1(transform, attackedEnemy.transform);
+        CBAATank.Enemyinf[2] = TempRot[1];//右边为正左边为负值
+
+        CBAATank.target1 = tankSpawner.Biolist[CBAATank.finalNum].transform.position;
+        if (CBAATank.baseFunction2.CalculateDisX0Z(CBAATank.target1, CBAATank.transform.position) > 30)
+            CBAATank.offset = ((CBAATank.target1 - CBAATank.transform.position).normalized + obstacleAvoid2.ObstacleVector(CBAATank, 45, 30).normalized + NRTeamMateAvoid(CBAATank, trainingSetting.BlueTeam.nums, 50)).normalized;//obstacleAvoid2.CacPosition(TATank, transform, TATank.target1, 180);//通过避障函数求出运行方向
+        else
+            CBAATank.offset = ((CBAATank.transform.position - CBAATank.target1).normalized + obstacleAvoid2.ObstacleVector(CBAATank, 45, 30).normalized + NRTeamMateAvoid(CBAATank, trainingSetting.BlueTeam.nums, 50)).normalized;//obstacleAvoid2.CacPosition(TATank, transform, TATank.target1, 180);//通过避障函数求出运行方向
+        CBAATank.offset[1] = 0;//令y方向为0
+
+
+        float t = 0.0f;
+        t = Mathf.Clamp01(t + (Time.deltaTime * 1.0f));
+        //坦克动作执行代码，转向由Slerp函数执行，前进由man.move函数执行
+        //Quaternion targetRotation1 = Quaternion.LookRotation(man.TowerDir);
+        //man.Tower.transform.rotation = Quaternion.Lerp(man.Tower.rotation, targetRotation1, t1);
+
+        Quaternion targetRotation = Quaternion.LookRotation(CBAATank.offset);
+        CBAATank.transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, t);
+
+        if (CBAATank.speedControl)
+        {
+            CBAATank.move(CBAATank.relativespeed * CBAATank.MaxSpeed, 0);
+        }
+
+        Vector3 newTarget = new Vector3(CBAATank.target1.x, CBAATank.target1.y + 1.5f, CBAATank.target1.z);
+        newTarget = newTarget - CBAATank.ShellPos.position;
+        if (CBAATank.Enemyinf[1] < 5)
+        {
+            CBAATank.enemyAngle = Vector3.Angle(newTarget, CBAATank.ShellPos.forward);
+            CBAATank.enemyAngle1 = newTarget.normalized.y > CBAATank.cannon.transform.forward.normalized.y ?
+                       CBAATank.enemyAngle : -CBAATank.enemyAngle;
+            CBAATank.OpenFire(1, CBAATank.enemyAngle1, 1);
+        }
+    }
+
+    public float calSuperiorty(ManControl biotank, ManControl tank)
+    {
+        float s1;//夹角信息
+        float s2;//位置信息
+        s1 = 1 - (Vector3.Angle(tank.transform.forward, biotank.transform.position - tank.transform.position)) / 180;
+        float dis = Vector3.Distance(tank.transform.position, biotank.transform.position);
+        if (dis > tank.OpenFireDis) s2 = tank.OpenFireDis / dis;
+        else s2 = 1;
+        return (float)(s1 * 0.3 + s2 * 0.7);
+    }
+
 
     public int judgeSelfPos(ManControl man, Vector3 target)
     {
