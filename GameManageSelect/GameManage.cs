@@ -200,13 +200,13 @@ public class GameManage : MonoBehaviour
     }
     void FixedUpdate()
     {
-        if (round >= 101)
-        {
-            if(isRecord)
-                RecordMode();//循环遍历
-            else 
-                Time.timeScale = 0;
-        }
+        //if (round >= 101)
+        //{
+        //    if(isRecord)
+        //        RecordMode();//循环遍历
+        //    else 
+        //        Time.timeScale = 0;
+        //}
         left_Step -= 1;
         RedScore = 0;
         BlueScore = 0;
@@ -924,7 +924,7 @@ public class GameManage : MonoBehaviour
     //计算智能体之间距离
     void CalcDistance()
     {
-        float distance1 = 0.0f, Matedistance = 0.0f, viewdistance = 1200.0f, TeammateDistance = 600.0f, allViewDistance = 600.0f;
+        float distance1 = 0.0f, Matedistance = 0.0f, viewdistance = 1200.0f, TeammateDistance = 600.0f, allViewDistance = 0.0f;
         //先更新蓝方对手列表
 
         if (!GameObject.Find("TankSpawner").GetComponent<TankSpawner>().useBio)
@@ -1029,7 +1029,7 @@ public class GameManage : MonoBehaviour
                                 }
                             }
 
-                            if (JudgeEnemy || distance1 <= 1500)
+                            if (JudgeEnemy || distance1 <= allViewDistance)
                             {
                                 red.BioEnemydir.TryAdd(distance1, blue);
                             }
@@ -1169,16 +1169,17 @@ public class GameManage : MonoBehaviour
             BlueAlgorithm = " ";
         }
 
-
+        RedAlgorithm = "";
+        BlueAlgorithm = " ";
 
         ManControl man = FindAnyObjectByType<ManControl>();
-        TextList[1].text = "场次: " + (round - 1 <= 100 ? round - 1 : 100).ToString() + " / 100 ";// + ((float)Red_win / (Red_win + Blue_win)).ToString("f3");// + " - " +
+        TextList[1].text = "Rounds: " + (round - 1 <= 100 ? round - 1 : 100).ToString() + " / 100 ";// + ((float)Red_win / (Red_win + Blue_win)).ToString("f3");// + " - " +
 
-        TextList[2].text = "红方当前存活: " + num_Red.ToString();
-        TextList[3].text = "蓝方当前存活: " + num_Blue.ToString();
+        TextList[2].text = "BIO_ExistNum: " + num_Red.ToString();
+        TextList[3].text = "RL_ExistNum: " + num_Blue.ToString();
 
 
-        TextList[4].text = "红方胜率: " + ((float)Red_win / (Red_win + Blue_win + Both_win)).ToString("f3");
+        TextList[4].text = "BIO_Win_Rate: " + ((float)Red_win / (Red_win + Blue_win + Both_win)).ToString("f3");
 
 
         
@@ -1197,14 +1198,14 @@ public class GameManage : MonoBehaviour
 
         eff = (1 / (a1 + 0.1f)) * 0.5f +(1 / (a2 + 0.1f)) * 0.5f;
         if (!TranningSetting.RedTeam.HumanControl && !TranningSetting.BlueTeam.HumanControl)
-            TextList[5].text = "红方效益指标: " + ((1 / (a1 + 0.1f)) * 0.5f +
-             (1 / (a2 + 0.1f)) * 0.5f).ToString("f3");
+            TextList[5].text = "BIO_Efficiency1: " + (a1).ToString("f3");
         else
             TextList[5].text = "";
 
-        TextList[6].text = "红方算法: " + RedAlgorithm;
-        TextList[7].text = "蓝方算法: " + BlueAlgorithm;
-        TextList[8].text = "环境: 丘陵";
+        TextList[6].text = "Red_Algorithm: " + RedAlgorithm;
+        TextList[7].text = "Blue_Algorithm: " + BlueAlgorithm;
+        TextList[8].text = "Env: Hill";
+        TextList[9].text = "BIO_Efficiency2: " + (a2).ToString("f3");
     }
 
     private void UpdateTitle(int redNum, int blueNum)
@@ -1226,7 +1227,7 @@ public class GameManage : MonoBehaviour
             RedTitle = " BIO";
             BlueTitle = " RL";
         }
-        TextList[0].text = "规模：" + redNum.ToString() + "(红方)" + " VS " + blueNum.ToString() + "(蓝方)";
+        TextList[0].text = "Scale：" + redNum.ToString() + "(RED)" + " VS " + blueNum.ToString() + "(BLUE)";
     }
     public Vector3 GenerateSpawnPoint()
     {

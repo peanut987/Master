@@ -236,33 +236,55 @@ public class EnemyJudge : MonoBehaviour
 	//}
 
 	//CBAA
+	//CBAA  规模5、10、20，修改后
 	public void assignEnemy(List<ManControl> list)
+	{
+		switch (list.Count)
+		{
+			case 5:
+				repeatCal(list, 0, 5);
+				break;
+			case 10:
+				repeatCal(list, 0, 5);
+				repeatCal(list, 5, 10);
+				break;
+			case 20:
+				repeatCal(list, 0, 5);
+				repeatCal(list, 5, 10);
+				repeatCal(list, 10, 15);
+				repeatCal(list, 15, 20);
+				break;
+		}
+	}
+
+
+	public void repeatCal(List<ManControl> list, int start, int end)
 	{
 		float maxValue = 0;
 		string assign = "";
-		for (int a = 0; a < list.Count; a++)
+		for (int a = start; a < end; a++)
 		{
-			float temp0 = list[0].superiority_factor[a];
-			for (int b = 0; b < list.Count; b++)
+			float temp0 = list[start].superiority_factor[a];
+			for (int b = start; b < end; b++)
 			{
 				if (a == b)
 					continue;
-				float temp1 = list[1].superiority_factor[b];
-				for (int c = 0; c < list.Count; c++)
+				float temp1 = list[start + 1].superiority_factor[b];
+				for (int c = start; c < end; c++)
 				{
 					if (a == c || b == c)
 						continue;
-					float temp2 = list[1].superiority_factor[c];
-					for (int d = 0; d < list.Count; d++)
+					float temp2 = list[start + 2].superiority_factor[c];
+					for (int d = start; d < end; d++)
 					{
 						if (a == d || b == d || d == c)
 							continue;
-						float temp3 = list[1].superiority_factor[d];
-						for (int e = 0; e < list.Count; e++)
+						float temp3 = list[start + 3].superiority_factor[d];
+						for (int e = start; e < end; e++)
 						{
 							if (a == e || b == e || e == c || e == d)
 								continue;
-							float temp4 = list[1].superiority_factor[e];
+							float temp4 = list[start + 4].superiority_factor[e];
 							float temp = temp0 + temp1 + temp2 + temp3 + temp4;
 							if (maxValue < temp)
 							{
@@ -274,14 +296,16 @@ public class EnemyJudge : MonoBehaviour
 				}
 			}
 		}
-		if (assign.Length == 5)
+
+		int k = 0;
+		if (assign.Length > 0)
 		{
-			for (int i = 0; i < list.Count; i++)
+			for (int i = start; i < end; i++)
 			{
-				list[i].finalNum = assign[i] - '0';
-				if (list[i].superiority_factor[assign[i] - '0'] == 0)
+				list[i].finalNum = assign[k] - '0';
+				if (list[i].superiority_factor[assign[k++] - '0'] == 0)
 				{
-					for (int j = 0; j < list.Count; j++)
+					for (int j = start; j < end; j++)
 					{
 						if (list[i].superiority_factor[j] != 0)
 						{
@@ -290,9 +314,7 @@ public class EnemyJudge : MonoBehaviour
 						}
 					}
 				}
-				//Debug.Log("info0: " + list[i].finalNum + list[i].name);
 			}
-			//Debug.Log("info: "+ maxValue + " " + assign);
 		}
 	}
 
